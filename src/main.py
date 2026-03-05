@@ -1,19 +1,35 @@
+import logging
 from extract import fetch_stock_data
 from transform import transform_stock_data
 from load import load_to_postgres
 
-def run_pipeline(symbol="NVDA"):
-    print("Extracting data...")
-    raw_data = fetch_stock_data(symbol)
+# config the logging to display info level messages with timestamps
+logging.basicConfig(
+    level=logging.INFO,                                 # set the logging level to INFO
+    format="%(asctime)s - %(levelname)s - %(message)s"  # specify the format of the log messages to include timestamp, log level, and message content
+)
 
-    print("Transforming data...")
-    df = transform_stock_data(raw_data, symbol)
+def run_pipeline(symbols):
+    for symbol in symbols:
+        try:
+            logging.info("Starting ETL pipeline for stock symbol: %s", symbol)
+            
+            logging.info("Extracting data...")
+            raw_data = fetch_stock_data(symbol)
 
-    print("Loading data into PostgreSQL...")
-    load_to_postgres(df)
+            logging.info("Transforming data...")
+            df = transform_stock_data(raw_data, symbol)
 
-    print("Pipeline completed successfully.")
+            logging.info("Loading data into PostgreSQL...")
+            load_to_postgres(df)
 
-# Run the pipeline for a specific stock symbol (e.g., "NVDA")
+            logging.info("Pipeline completed successfully.")
+
+        except Exception as e:
+            logging.error(f"Pipeline failed: {e}")
+            raise
+
+# Run the pipeline for a list of stock symbols
 if __name__ == "__main__":
-    run_pipeline("NVDA")
+    symbols = ["NVDA","AAPL","MSFT","GOOGL","AMZN"]
+    run_pipeline(symbols)

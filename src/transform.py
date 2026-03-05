@@ -1,7 +1,19 @@
 import pandas as pd
 
 def transform_stock_data(raw_data, symbol):
+    # Check for API errors from extraction phase first.
+    if "Error Message" in raw_data:
+        raise ValueError(f"API Error for {symbol}: {raw_data['Error Message']}")
+    
+    if "Note" in raw_data:
+        raise ValueError(f"API Rate Limit for {symbol}: {raw_data['Note']}")
+    
+    
+    # Extract the data from the extracted JSON
     time_series = raw_data.get("Time Series (Daily)", {}) # {} means if the key is not found, it will return an empty dictionary instead of throwing an error
+
+    if not time_series:
+        raise ValueError(f"No data received for symbol {symbol}. API may have returned an error or rate limit.")
 
     records = []
 
@@ -17,6 +29,9 @@ def transform_stock_data(raw_data, symbol):
         })
 
     df = pd.DataFrame(records)
+    if "date" not in df.columns:
+        raise ValueError(f"'date' column not found in transformed data for {symbol}")
+    
     df["date"] = pd.to_datetime(df["date"])
 
     return df
