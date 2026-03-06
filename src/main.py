@@ -1,7 +1,7 @@
 import logging
-from extract import fetch_stock_data
-from transform import transform_stock_data
-from load import load_to_postgres
+from ingestion.extract import fetch_stock_data
+from processing.transform import transform_stock_data
+from loaders.load import load_to_postgres
 
 # config the logging to display info level messages with timestamps
 logging.basicConfig(
