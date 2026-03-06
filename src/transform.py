@@ -8,6 +8,8 @@ def transform_stock_data(raw_data, symbol):
     if "Note" in raw_data:
         raise ValueError(f"API Rate Limit for {symbol}: {raw_data['Note']}")
     
+    if "Information" in raw_data:
+        raise ValueError(f"API Daily Quota Exceeded for {symbol}: {raw_data['Information']}")
     
     # Extract the data from the extracted JSON
     time_series = raw_data.get("Time Series (Daily)", {}) # {} means if the key is not found, it will return an empty dictionary instead of throwing an error
