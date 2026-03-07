@@ -6,4 +6,3 @@ This project involves building an ETL pipeline, which fetches data from a public
 Looks like a newbie data engineering project at this point, obviously.
 
 But expected to make it better day after day.
-
