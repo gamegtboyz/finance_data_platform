@@ -41,7 +41,7 @@ def fetch_and_store(symbol):
         time.sleep(60)
         return fetch_and_store(symbol)
     
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
 
     # create the new blank json file
     filepath = f"data/raw/{symbol}_{timestamp}.json"
