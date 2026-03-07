@@ -35,9 +35,10 @@ def load_to_postgres(df):
 
     # insert data into stock_prices table as a bulk
     # Convert all numpy types to Python native types to avoid psycopg2 adapter errors
+    fact_columns = ["symbol", "date", "open", "high", "low", "close", "volume"]
     df['date'] = df['date'].dt.to_pydatetime()  # numpy.datetime64 -> datetime
     # Use .values.tolist() to convert numpy types to native Python types
-    values = [tuple(row) for row in df.values.tolist()]
+    values = [tuple(row) for row in df[fact_columns].values.tolist()]
 
     insert_query = """
         INSERT INTO stock_prices (symbol, date, open, high, low, close, volume)
