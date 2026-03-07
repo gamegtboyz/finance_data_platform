@@ -10,7 +10,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-def run_pipeline(symbols):
+def run(symbols):
     for symbol in symbols:
         try:
             logging.info(f"Fetching {symbol}")
@@ -31,4 +31,4 @@ def run_pipeline(symbols):
 # Run the pipeline for a list of stock symbols
 if __name__ == "__main__":
     symbols = ["NVDA","AAPL","MSFT","GOOGL","AMZN"]
-    run_pipeline(symbols)
+    run(symbols)
