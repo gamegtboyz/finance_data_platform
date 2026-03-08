@@ -54,3 +54,24 @@ def fetch_and_store(symbol):
         json.dump(data,f)
     
     return filepath
+
+def fetch_company_metadata(symbol):
+    url = "https://www.alphavantage.co/query"
+
+    params = {
+        "function": "OVERVIEW",
+        "symbol": symbol,
+        "apikey": API_KEY
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    filepath = f"data/raw/company_metadata/{symbol}/{symbol}_metadata.json"
+
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+    with open(filepath, "w") as f:
+        json.dump(data, f)
+    
+    return filepath

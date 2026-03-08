@@ -15,7 +15,6 @@ def transform(filepath, symbol):
     for date, values in time_series.items():
         records.append({
             "symbol": symbol,   # pass the argument symbol to the function and include it in the records
-            "company_name": "Company name for " + symbol,
             "date": date,       # convert the date string to a datetime object
             "open": float(values["1. open"]),
             "high": float(values["2. high"]),
@@ -32,3 +31,15 @@ def transform(filepath, symbol):
     df["date"] = pd.to_datetime(df["date"])
 
     return df
+
+def load_company_metadata(filepath):
+    with open(filepath, "r") as f:
+        data = json.load(f)
+
+    metadata = {
+        "symbol": data.get("Symbol", ""),
+        "company_name": data.get("Name", ""),
+        "sector": data.get("Sector")
+    }
+
+    return metadata

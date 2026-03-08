@@ -61,7 +61,33 @@ def create_dim_dates():
     cursor.close()  # close the cursor
     conn.close()  # close the connection
 
+def create_dim_metadata():
+    conn = psycopg2.connect(
+        host = os.getenv("DB_HOST"),
+        port = os.getenv("DB_PORT"),
+        dbname = os.getenv("DB_NAME"),
+        user = os.getenv("DB_USER"),
+        password = os.getenv("DB_PASSWORD")
+    )
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS dim_metadata (
+            symbol TEXT PRIMARY KEY,
+            company_name TEXT,
+            sector TEXT
+            );
+        """       
+    )
+
+    cursor.commit()
+    cursor.close()
+    conn.close()
+
     # run the functions to create the dimension tables when this script is executed directly, not from the orchestration script (python entry point guard)
     if __name__ == "__main__":
         create_dim_stocks()
         create_dim_dates()
+        create_dim_metadata()

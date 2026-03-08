@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from ingestion.alphavantage_ingest import fetch_and_store
 from processing.transform_stock import transform
 from loaders.postgres_loader import load_to_postgres
-from loaders.dimension_loader import load_dim_stocks, load_dim_dates
-from modeling.create_dimension_tables import create_dim_stocks, create_dim_dates
+from loaders.dimension_loader import load_dim_stocks, load_dim_dates, load_dim_metadata
+from modeling.create_dimension_tables import create_dim_stocks, create_dim_dates, create_dim_metadata
 from modeling.create_fact_tables import create_fact_table
 
 # config the logging to display info level messages with timestamps
@@ -40,6 +40,7 @@ def run(symbols):
             logging.info("Populating dimension tables")
             load_dim_stocks(cursor, symbol)
             load_dim_dates(cursor, df)
+            load_dim_metadata(cursor, symbol)
             
             logging.info("Loading into fact table")
             load_to_postgres(df)
@@ -55,5 +56,6 @@ if __name__ == "__main__":
     symbols = ["NVDA","AAPL","MSFT","GOOGL","AMZN"]
     create_dim_stocks()  # ensure the dim_stocks table is created before loading data
     create_dim_dates()   # ensure the dim_dates table is created before loading data
+    create_dim_metadata()  # ensure the dim_metadata table is created before loading data
     create_fact_table()  # ensure the fact table is created before loading data
     run(symbols)

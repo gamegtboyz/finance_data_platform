@@ -26,3 +26,13 @@ def load_dim_dates(cursor, df):
             """,
             (row["date"], row["day"], row["month"], row["year"], row["quarter"])
         )
+
+def load_dim_metadata(cursor, metadata):
+    cursor.execute(
+        """
+        INSERT INTO dim_metadata (symbol, company_name, sector)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (symbol) DO NOTHING;
+        """,
+        (metadata["symbol"], metadata["company_name"], metadata["sector"])
+    )
