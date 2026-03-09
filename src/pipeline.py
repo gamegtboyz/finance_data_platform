@@ -4,8 +4,8 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 
-from ingestion.alphavantage_ingest import fetch_and_store
-from processing.transform_stock import transform
+from ingestion.alphavantage_ingest import fetch_and_store, fetch_company_metadata
+from processing.transform_stock import transform, load_company_metadata
 from loaders.postgres_loader import load_to_postgres
 from loaders.dimension_loader import load_dim_stocks, load_dim_dates, load_dim_metadata
 from modeling.create_dimension_tables import create_dim_stocks, create_dim_dates, create_dim_metadata
@@ -33,21 +33,25 @@ def run(symbols):
         try:
             logging.info(f"Fetching {symbol}")
             filepath = fetch_and_store(symbol)
+            time.sleep(12)
+            metadata_filepath = fetch_company_metadata(symbol)
+            time.sleep(12)
 
             logging.info("Transforming")
             df = transform(filepath, symbol)
+            metadata = load_company_metadata(metadata_filepath)
 
             logging.info("Populating dimension tables")
             load_dim_stocks(cursor, symbol)
-            load_dim_dates(cursor, df)
-            load_dim_metadata(cursor, symbol)
+            load_dim_dates(cursor, df)            
+            load_dim_metadata(cursor, metadata)
+            conn.commit()
             
             logging.info("Loading into fact table")
             load_to_postgres(df)
 
-            time.sleep(12)  # sleep for 12 secs to avoid minute-wise API request limit
-
         except Exception as e:
+            conn.rollback()
             logging.error(f"Pipeline failed: {e}")
             raise
 

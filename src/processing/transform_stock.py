@@ -36,8 +36,15 @@ def load_company_metadata(filepath):
     with open(filepath, "r") as f:
         data = json.load(f)
 
+    if "Information" in data or "Note" in data:
+        raise ValueError(f"Metadata file contains an API quota/rate limit response, not real data. Re-fetch the metadata file.")
+
+    symbol = data.get("Symbol", "")
+    if not symbol:
+        raise ValueError(f"Metadata file is missing 'Symbol' field. The file may contain an API error response.")
+
     metadata = {
-        "symbol": data.get("Symbol", ""),
+        "symbol": symbol,
         "company_name": data.get("Name", ""),
         "sector": data.get("Sector")
     }

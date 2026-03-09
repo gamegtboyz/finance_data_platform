@@ -67,7 +67,18 @@ def fetch_company_metadata(symbol):
     response = requests.get(url, params=params)
     data = response.json()
 
-    filepath = f"data/raw/company_metadata/{symbol}/{symbol}_metadata.json"
+    if "Information" in data:
+        raise RuntimeError(f"AlphaVantage daily quota exceeded for {symbol} metadata: {data['Information']}")
+
+    if "Note" in data:
+        logging.warning(f"API rate limit reached fetching metadata for {symbol}. Waiting 60 seconds...")
+        time.sleep(60)
+        return fetch_company_metadata(symbol)
+
+    if "Error Message" in data:
+        raise RuntimeError(f"AlphaVantage API error for {symbol} metadata: {data['Error Message']}")
+
+    filepath = f"data/raw/{symbol}/{symbol}_metadata.json"
 
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
 

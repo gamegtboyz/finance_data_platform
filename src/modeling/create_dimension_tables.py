@@ -82,7 +82,7 @@ def create_dim_metadata():
         """       
     )
 
-    cursor.commit()
+    conn.commit()
     cursor.close()
     conn.close()
 

@@ -29,6 +29,7 @@ def create_fact_table():
             volume BIGINT,
             PRIMARY KEY (symbol, date),
             FOREIGN KEY (symbol) REFERENCES dim_stocks(symbol),
+            FOREIGN KEY (symbol) REFERENCES dim_metadata(symbol),
             FOREIGN KEY (date) REFERENCES dim_date(date)
         );
         """
