@@ -4,8 +4,8 @@ import glob
 import psycopg2
 from dotenv import load_dotenv
 
-from processing.transform_stock import transform, load_company_metadata
-from loaders.postgres_loader import load_to_postgres
+from processing.transform_stock import transform_stock_prices, transform_company_metadata
+from loaders.fact_loader import load_stock_prices
 from loaders.dimension_loader import load_dim_dates, load_dim_metadata
 from modeling.create_dimension_tables import create_dim_dates, create_dim_metadata
 from modeling.create_fact_tables import create_fact_table
@@ -49,8 +49,8 @@ def reprocess(symbols):
             logging.info(f"Using data file: {filepath}")
 
             logging.info("Transforming")
-            df = transform(filepath, symbol)
-            metadata = load_company_metadata(metadata_filepath)
+            df = transform_stock_prices(filepath, symbol)
+            metadata = transform_company_metadata(metadata_filepath)
 
             logging.info("Populating dimension tables")
             load_dim_dates(cursor, df)
@@ -58,7 +58,7 @@ def reprocess(symbols):
             conn.commit()
 
             logging.info("Loading into fact table")
-            load_to_postgres(df)
+            load_stock_prices(df)
 
             logging.info(f"Reprocess completed for {symbol}")
 

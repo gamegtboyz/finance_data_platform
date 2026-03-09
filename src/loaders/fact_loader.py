@@ -6,7 +6,7 @@ from psycopg2.extras import execute_values
 load_dotenv()
 
 # open the connection to the PostgreSQL database using credentials from environment variables
-def load_to_postgres(df):
+def load_stock_prices(df):
     conn = psycopg2.connect(
         host=os.getenv('DB_HOST'),
         port=os.getenv('DB_PORT'),

@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 
-def transform(filepath, symbol):
+def transform_stock_prices(filepath, symbol):
 
     # read the extracted JSON file
     with open (filepath, "r") as f:

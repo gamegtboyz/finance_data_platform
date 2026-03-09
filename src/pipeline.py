@@ -4,9 +4,9 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 
-from ingestion.alphavantage_ingest import fetch_and_store, fetch_company_metadata
-from processing.transform_stock import transform, transform_company_metadata
-from loaders.postgres_loader import load_to_postgres
+from ingestion.alphavantage_ingest import fetch_stock_prices, fetch_company_metadata
+from processing.transform_stock import transform_stock_prices, transform_company_metadata
+from loaders.fact_loader import load_stock_prices
 from loaders.dimension_loader import load_dim_dates, load_dim_metadata
 from modeling.create_dimension_tables import create_dim_dates, create_dim_metadata
 from modeling.create_fact_tables import create_fact_table
@@ -32,13 +32,13 @@ def run(symbols):
     for symbol in symbols:
         try:
             logging.info(f"Fetching {symbol}")
-            filepath = fetch_and_store(symbol)
+            filepath = fetch_stock_prices(symbol)
             time.sleep(12)
             metadata_filepath = fetch_company_metadata(symbol)
             time.sleep(12)
 
             logging.info("Transforming")
-            df = transform(filepath, symbol)
+            df = transform_stock_prices(filepath, symbol)
             metadata = transform_company_metadata(metadata_filepath)
 
             logging.info("Populating dimension tables")
@@ -47,7 +47,7 @@ def run(symbols):
             conn.commit()
             
             logging.info("Loading into fact table")
-            load_to_postgres(df)
+            load_stock_prices(df)
 
         except Exception as e:
             conn.rollback()
