@@ -82,12 +82,12 @@ def create_dim_metadata():
         """       
     )
 
-    conn.commit()
+    conn.commit()   # 
     cursor.close()
     conn.close()
 
-    # run the functions to create the dimension tables when this script is executed directly, not from the orchestration script (python entry point guard)
-    if __name__ == "__main__":
-        create_dim_stocks()
-        create_dim_dates()
-        create_dim_metadata()
+# run the functions to create the dimension tables when this script is executed directly, not from the orchestration script (python entry point guard)
+if __name__ == "__main__":
+    create_dim_stocks()
+    create_dim_dates()
+    create_dim_metadata()

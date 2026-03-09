@@ -39,5 +39,5 @@ def create_fact_table():
     cursor.close()
     conn.close()
 
-    if __name__ == "__main__":
-        create_fact_table()
+if __name__ == "__main__":
+    create_fact_table()
