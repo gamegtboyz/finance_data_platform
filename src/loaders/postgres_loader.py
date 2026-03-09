@@ -17,22 +17,6 @@ def load_to_postgres(df):
 
     cursor = conn.cursor()  # create a cursor object to interact with the database
 
-    # # Insert data into the stock_prices table row by row, using ON CONFLICT to avoid duplicates
-    # for _, row in df.iterrows():
-    #     cursor.execute("""
-    #         INSERT INTO stock_prices (symbol, date, open, high, low, close, volume)
-    #         VALUES (%s, %s, %s, %s, %s, %s, %s)
-    #         ON CONFLICT (symbol, date) DO NOTHING
-    #     """, (
-    #         row['symbol'],
-    #         row['date'],
-    #         row['open'],
-    #         row['high'],
-    #         row['low'],
-    #         row['close'],
-    #         row['volume']
-    #     ))
-
     # insert data into stock_prices table as a bulk
     # Convert all numpy types to Python native types to avoid psycopg2 adapter errors
     fact_columns = ["symbol", "date", "open", "high", "low", "close", "volume"]

@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 from processing.transform_stock import transform, load_company_metadata
 from loaders.postgres_loader import load_to_postgres
-from loaders.dimension_loader import load_dim_stocks, load_dim_dates, load_dim_metadata
-from modeling.create_dimension_tables import create_dim_stocks, create_dim_dates, create_dim_metadata
+from loaders.dimension_loader import load_dim_dates, load_dim_metadata
+from modeling.create_dimension_tables import create_dim_dates, create_dim_metadata
 from modeling.create_fact_tables import create_fact_table
 
 logging.basicConfig(level=logging.INFO)
@@ -53,7 +53,6 @@ def reprocess(symbols):
             metadata = load_company_metadata(metadata_filepath)
 
             logging.info("Populating dimension tables")
-            load_dim_stocks(cursor, symbol)
             load_dim_dates(cursor, df)
             load_dim_metadata(cursor, metadata)
             conn.commit()
@@ -73,7 +72,6 @@ def reprocess(symbols):
 
 if __name__ == "__main__":
     symbols = ["NVDA", "AAPL", "MSFT", "GOOGL", "AMZN"]
-    create_dim_stocks()
     create_dim_dates()
     create_dim_metadata()
     create_fact_table()

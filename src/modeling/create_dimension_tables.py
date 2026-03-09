@@ -4,33 +4,6 @@ import os
 
 load_dotenv()
 
-def create_dim_stocks():
-    # open the SQL connection
-    conn = psycopg2.connect(
-        host=os.getenv('DB_HOST'),
-        port=os.getenv('DB_PORT'),
-        dbname=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD')
-    )
-
-    # create a cursor object to interact with the database
-    cursor = conn.cursor()
-
-    # create the table if not exists, otherwise do nothing.
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS dim_stocks (
-            symbol TEXT PRIMARY KEY,
-            company_name TEXT
-        );
-        """
-    )
-
-    conn.commit()  # commit the transaction to save changes
-    cursor.close()  # close the cursor
-    conn.close()  # close the connection
-
 def create_dim_dates():
     # open the SQL connection, it requires host, port, database_name, username, and password
     conn = psycopg2.connect(
@@ -88,6 +61,5 @@ def create_dim_metadata():
 
 # run the functions to create the dimension tables when this script is executed directly, not from the orchestration script (python entry point guard)
 if __name__ == "__main__":
-    create_dim_stocks()
     create_dim_dates()
     create_dim_metadata()
