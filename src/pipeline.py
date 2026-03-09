@@ -5,7 +5,7 @@ import psycopg2
 from dotenv import load_dotenv
 
 from ingestion.alphavantage_ingest import fetch_and_store, fetch_company_metadata
-from processing.transform_stock import transform, load_company_metadata
+from processing.transform_stock import transform, transform_company_metadata
 from loaders.postgres_loader import load_to_postgres
 from loaders.dimension_loader import load_dim_stocks, load_dim_dates, load_dim_metadata
 from modeling.create_dimension_tables import create_dim_stocks, create_dim_dates, create_dim_metadata
@@ -39,7 +39,7 @@ def run(symbols):
 
             logging.info("Transforming")
             df = transform(filepath, symbol)
-            metadata = load_company_metadata(metadata_filepath)
+            metadata = transform_company_metadata(metadata_filepath)
 
             logging.info("Populating dimension tables")
             load_dim_stocks(cursor, symbol)

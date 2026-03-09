@@ -32,7 +32,7 @@ def transform(filepath, symbol):
 
     return df
 
-def load_company_metadata(filepath):
+def transform_company_metadata(filepath):
     with open(filepath, "r") as f:
         data = json.load(f)
 
@@ -46,7 +46,7 @@ def load_company_metadata(filepath):
     metadata = {
         "symbol": symbol,
         "company_name": data.get("Name", ""),
-        "sector": data.get("Sector")
+        "sector": data.get("Sector", "")
     }
 
     return metadata
