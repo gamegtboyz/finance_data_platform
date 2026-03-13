@@ -24,7 +24,9 @@ def transform_stock_prices(filepath, symbol):
             "day" : pd.to_datetime(date).day,
             "month" : pd.to_datetime(date).month,
             "year" : pd.to_datetime(date).year,
-            "quarter" : ((pd.to_datetime(date).month - 1) // 3) + 1 # ensure the quarter is classified correctly
+            "quarter" : ((pd.to_datetime(date).month - 1) // 3) + 1, # ensure the quarter is classified correctly
+            "day_of_week" : pd.to_datetime(date).day_name(),
+            "week_of_year" : pd.to_datetime(date).isocalendar().week
         })
 
     df = pd.DataFrame(records)

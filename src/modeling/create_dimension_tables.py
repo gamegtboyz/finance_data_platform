@@ -25,7 +25,9 @@ def create_dim_dates():
             day INT,
             month INT,
             year INT,
-            quarter INT
+            quarter INT,
+            day_of_week INT,
+            week_of_year INT
         );
         """
     )

@@ -1,21 +1,16 @@
-import psycopg2
-import os
-from dotenv import load_dotenv
 from psycopg2.extras import execute_values
 
-load_dotenv()
-
 # open the connection to the PostgreSQL database using credentials from environment variables
-def load_stock_prices(df):
-    conn = psycopg2.connect(
-        host=os.getenv('DB_HOST'),
-        port=os.getenv('DB_PORT'),
-        dbname=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD')
-    )
-
-    cursor = conn.cursor()  # create a cursor object to interact with the database
+def load_stock_prices(cursor, df):
+    """
+    we used to create the connection and cursor inside this function
+    but we moed it out to pipeline.py for maintainability purposes
+    in case of rollback and error handling across multiple steps
+    of the pipeline.
+    We want to be able to rollback the entire transaction
+    if any step fails, which requires us to use the same connection
+    and cursor across all steps in the pipeline.
+    """
 
     # insert data into stock_prices table as a bulk
     # Convert all numpy types to Python native types to avoid psycopg2 adapter errors
@@ -31,7 +26,3 @@ def load_stock_prices(df):
     """
 
     execute_values(cursor, insert_query, values)
-
-    conn.commit()
-    cursor.close()
-    conn.close()

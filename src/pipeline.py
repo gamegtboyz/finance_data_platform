@@ -13,8 +13,12 @@ from modeling.create_fact_tables import create_fact_table
 
 # config the logging to display info level messages with timestamps
 logging.basicConfig(
-    level=logging.INFO
+    level=logging.INFO,
+    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt = '%Y-%m-%d %H:%M:%S'
 )
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()  # load environment variables from .env file
 
@@ -31,27 +35,27 @@ def run(symbols):
 
     for symbol in symbols:
         try:
-            logging.info(f"Fetching {symbol}")
+            logger.info(f"Fetching {symbol}")
             filepath = fetch_stock_prices(symbol)
             time.sleep(12)
             metadata_filepath = fetch_company_metadata(symbol)
             time.sleep(12)
 
-            logging.info("Transforming")
+            logger.info("Transforming")
             df = transform_stock_prices(filepath, symbol)
             metadata = transform_company_metadata(metadata_filepath)
 
-            logging.info("Populating dimension tables")
+            logger.info("Populating dimension tables")
             load_dim_dates(cursor, df)            
             load_dim_metadata(cursor, metadata)
             conn.commit()
             
-            logging.info("Loading into fact table")
+            logger.info("Loading into fact table")
             load_stock_prices(df)
 
         except Exception as e:
             conn.rollback()
-            logging.error(f"Pipeline failed: {e}")
+            logger.error(f"Pipeline failed: {e}")
             raise
 
 # Run the pipeline for a list of stock symbols
