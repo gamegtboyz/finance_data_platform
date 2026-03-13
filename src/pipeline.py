@@ -10,6 +10,7 @@ from loaders.fact_loader import load_stock_prices
 from loaders.dimension_loader import load_dim_dates, load_dim_metadata
 from modeling.create_dimension_tables import create_dim_dates, create_dim_metadata
 from modeling.create_fact_tables import create_fact_table
+from modeling.create_indexes import create_indexes
 
 # config the logging to display info level messages with timestamps
 logging.basicConfig(
@@ -64,4 +65,5 @@ if __name__ == "__main__":
     create_dim_dates()   # ensure the dim_dates table is created before loading data
     create_dim_metadata()  # ensure the dim_metadata table is created before loading data
     create_fact_table()  # ensure the fact table is created before loading data
+    create_indexes()  # create indexes on the fact table for performance
     run(symbols)
