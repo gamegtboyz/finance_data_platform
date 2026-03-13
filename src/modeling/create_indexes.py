@@ -11,15 +11,11 @@ def create_indexes():
     # create cursor object to interact with the SQL connection
     cursor = conn.cursor()
 
-    # # index on symbol - frequently used in WHERE clauses
-    # cursor.execute(
-    #     """
-    #     CREATE INDEX IF NOT EXISTS idx_stock_prices_symbol
-    #     ON stock_prices (symbol);
-    #     """
-    # )
+    # idx_stock_prices_symbol (solo symbol) is skipped: the composite PRIMARY KEY
+    # (symbol, date) already satisfies queries filtering by symbol alone via index
+    # scan on the leading column.
 
-    # index on date - frequently used in range queries
+    # index on date — frequently used in range queries
     cursor.execute(
         """
         CREATE INDEX IF NOT EXISTS idx_stock_prices_date
@@ -27,13 +23,8 @@ def create_indexes():
         """
     )
 
-    # # composite index on (symbol, date) - covers common queries which use both symbol and date
-    # cursor.execute(
-    #     """
-    #     CREATE INDEX IF NOT EXISTS idx_stock_prices_symbol_date
-    #     ON stock_prices (symbol, date);
-    #     """
-    # )
+    # idx_stock_prices_symbol_date composite index is skipped: the PRIMARY KEY
+    # constraint already creates an equivalent B-tree index on (symbol, date).
 
     conn.commit()
     cursor.close()

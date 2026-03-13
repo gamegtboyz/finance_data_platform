@@ -1,18 +1,5 @@
 from psycopg2.extras import execute_values
 
-# this function load the dimension tables in the database row-by-row, we replaced it with the bulk version in a following method
-def load_dim_dates_iter(cursor, df):
-    for _, row in df.iterrows():
-        cursor.execute(
-            """
-            INSERT INTO dim_date (date, day, month, year, quarter)
-            VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (date) DO NOTHING;
-            """,
-            (row["date"], row["day"], row["month"], row["year"], row["quarter"])
-        )
-
-# add the bulk loading version of load_dim_dates
 def load_dim_dates(cursor, df):
     """
     Load the date dimensions in bulk,

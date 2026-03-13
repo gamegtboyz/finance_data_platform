@@ -30,6 +30,10 @@ def transform_stock_prices(filepath, symbol):
         })
 
     df = pd.DataFrame(records)
+
+    if df.empty:
+        return df
+
     df["date"] = pd.to_datetime(df["date"])
 
     return df

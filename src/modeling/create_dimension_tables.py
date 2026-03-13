@@ -22,15 +22,6 @@ def create_dim_dates():
         """
     )
 
-    # safely add the new columns to existing tables
-    cursor.execute(
-        """
-        ALTER TABLE dim_date
-        ADD COLUMN IF NOT EXISTS day_of_week INT,
-        ADD COLUMN IF NOT EXISTS week_of_year INT;
-        """
-    )
-
     conn.commit()  # commit the transaction to save changes
     cursor.close()  # close the cursor
     conn.close()  # close the connection

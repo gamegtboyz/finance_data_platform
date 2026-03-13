@@ -12,6 +12,8 @@ from modeling.create_fact_tables import create_fact_table
 
 logging.basicConfig(level=logging.INFO)
 
+logger = logging.getLogger(__name__)
+
 def get_latest_file(symbol):
     """Return the most recently dated OHLCV JSON file for a symbol."""
     pattern = str(pathlib.Path(__file__).parent.parent / f"data/raw/{symbol}/{symbol}_*.json")
@@ -29,38 +31,39 @@ def get_metadata_file(symbol):
 
 def reprocess(symbols):
     conn = db_connect()
-
     cursor = conn.cursor()
 
-    for symbol in symbols:
-        try:
-            logging.info(f"Reprocessing {symbol} from local files")
+    try:
+        for symbol in symbols:
+            try:
+                logger.info(f"Reprocessing {symbol} from local files")
 
-            filepath = get_latest_file(symbol)
-            metadata_filepath = get_metadata_file(symbol)
-            logging.info(f"Using data file: {filepath}")
+                filepath = get_latest_file(symbol)
+                metadata_filepath = get_metadata_file(symbol)
+                logger.info(f"Using data file: {filepath}")
 
-            logging.info("Transforming")
-            df = transform_stock_prices(filepath, symbol)
-            metadata = transform_company_metadata(metadata_filepath)
+                logger.info("Transforming")
+                df = transform_stock_prices(filepath, symbol)
+                metadata = transform_company_metadata(metadata_filepath)
 
-            logging.info("Populating dimension tables")
-            load_dim_dates(cursor, df)
-            load_dim_metadata(cursor, metadata)
-            conn.commit()
+                logger.info("Populating dimension tables")
+                load_dim_dates(cursor, df)
+                load_dim_metadata(cursor, metadata)
+                conn.commit()
 
-            logging.info("Loading into fact table")
-            load_stock_prices(cursor, df)
+                logger.info("Loading into fact table")
+                load_stock_prices(cursor, df)
+                conn.commit()
 
-            logging.info(f"Reprocess completed for {symbol}")
+                logger.info(f"Reprocess completed for {symbol}")
 
-        except Exception as e:
-            conn.rollback()
-            logging.error(f"Reprocess failed for {symbol}: {e}")
-            raise
-
-    cursor.close()
-    conn.close()
+            except Exception as e:
+                conn.rollback()
+                logger.error(f"Reprocess failed for {symbol}: {e}")
+                raise
+    finally:
+        cursor.close()
+        conn.close()
 
 if __name__ == "__main__":
     symbols = ["NVDA", "AAPL", "MSFT", "GOOGL", "AMZN"]

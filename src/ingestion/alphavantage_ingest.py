@@ -4,11 +4,16 @@ import json
 from datetime import datetime
 import time
 import logging
+import pathlib
 from dotenv import load_dotenv
 
 load_dotenv()   # load environment variables from .env file
 
 API_KEY = os.getenv('ALPHAVANTAGE_API_KEY')
+
+logger = logging.getLogger(__name__)
+
+RAW_DATA_DIR = pathlib.Path(__file__).parent.parent.parent / "data" / "raw"
 
 def fetch_stock_prices(symbol):
     url = "https://www.alphavantage.co/query"
@@ -21,42 +26,43 @@ def fetch_stock_prices(symbol):
     }
 
     response = requests.get(url, params=params, timeout=60)
+    response.raise_for_status()
     data = response.json()
-    
+
     # Daily quota exceeded (free tier: 25 req/day). "Information" key is returned
     # instead of "Note" when the per-day limit is hit — this is distinct from the
     # per-minute rate limit and cannot be resolved by waiting.
     if "Information" in data:
         raise RuntimeError(f"AlphaVantage daily quota exceeded for {symbol}: {data['Information']}")
-    
-    # add minute-wise rate limit handling
+
+    # Per-minute rate limit: retry up to 3 times with 60-second backoff.
     if "Note" in data:
-        logging.warning(f"API rate limit reached for {symbol}. Waiting 60 seconds...")
-        attempt = 0
-        while attempt < 3:
-            time.sleep(12)
-            attempt += 1
-            return fetch_stock_prices(symbol)
-        raise RuntimeError(f"API rate limit reached for {symbol} after 3 attempts")
+        for attempt in range(1, 4):
+            logger.warning(f"API rate limit reached for {symbol}. Attempt {attempt}/3 — waiting 60 seconds...")
+            time.sleep(60)
+            retry_response = requests.get(url, params=params, timeout=60)
+            retry_response.raise_for_status()
+            retry_data = retry_response.json()
+            if "Note" not in retry_data:
+                data = retry_data
+                break
+        else:
+            raise RuntimeError(f"API rate limit for {symbol} persisted after 3 retry attempts")
 
     # Check for other error messages
     if "Error Message" in data:
-        logging.error(f"API error for {symbol}: {data['Error Message']}")
+        logger.error(f"API error for {symbol}: {data['Error Message']}")
         raise RuntimeError(f"AlphaVantage API error for {symbol}: {data['Error Message']}")
-    
+
     timestamp = datetime.utcnow().strftime("%Y-%m-%d")
 
-    # create the new blank json file
-    filepath = f"data/raw/{symbol}/{symbol}_{timestamp}.json"
+    filepath = RAW_DATA_DIR / symbol / f"{symbol}_{timestamp}.json"
+    filepath.parent.mkdir(parents=True, exist_ok=True)
 
-    # create the directory if it doesn't exist
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-
-    # write the extracted data to the json file
     with open(filepath, "w") as f:
-        json.dump(data,f)
-    
-    return filepath
+        json.dump(data, f)
+
+    return str(filepath)
 
 def fetch_company_metadata(symbol):
     url = "https://www.alphavantage.co/query"
@@ -68,24 +74,32 @@ def fetch_company_metadata(symbol):
     }
 
     response = requests.get(url, params=params, timeout=60)
+    response.raise_for_status()
     data = response.json()
 
     if "Information" in data:
         raise RuntimeError(f"AlphaVantage daily quota exceeded for {symbol} metadata: {data['Information']}")
 
     if "Note" in data:
-        logging.warning(f"API rate limit reached fetching metadata for {symbol}. Waiting 60 seconds...")
-        time.sleep(60)
-        return fetch_company_metadata(symbol)
+        for attempt in range(1, 4):
+            logger.warning(f"API rate limit reached fetching metadata for {symbol}. Attempt {attempt}/3 — waiting 60 seconds...")
+            time.sleep(60)
+            retry_response = requests.get(url, params=params, timeout=60)
+            retry_response.raise_for_status()
+            retry_data = retry_response.json()
+            if "Note" not in retry_data:
+                data = retry_data
+                break
+        else:
+            raise RuntimeError(f"API rate limit for {symbol} metadata persisted after 3 retry attempts")
 
     if "Error Message" in data:
         raise RuntimeError(f"AlphaVantage API error for {symbol} metadata: {data['Error Message']}")
 
-    filepath = f"data/raw/{symbol}/{symbol}_metadata.json"
-
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    filepath = RAW_DATA_DIR / symbol / f"{symbol}_metadata.json"
+    filepath.parent.mkdir(parents=True, exist_ok=True)
 
     with open(filepath, "w") as f:
         json.dump(data, f)
-    
-    return filepath
+
+    return str(filepath)
