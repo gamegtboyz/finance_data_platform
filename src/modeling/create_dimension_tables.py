@@ -1,18 +1,8 @@
-import psycopg2
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
+from db_connect import db_connect
 
 def create_dim_dates():
     # open the SQL connection, it requires host, port, database_name, username, and password
-    conn = psycopg2.connect(
-        host = os.getenv("DB_HOST"),
-        port = os.getenv("DB_PORT"),
-        dbname = os.getenv("DB_NAME"),
-        user = os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD")
-    )
+    conn = db_connect()
 
     # create a cursor object to interact with the database
     cursor = conn.cursor()
@@ -32,18 +22,21 @@ def create_dim_dates():
         """
     )
 
+    # safely add the new columns to existing tables
+    cursor.execute(
+        """
+        ALTER TABLE dim_date
+        ADD COLUMN IF NOT EXISTS day_of_week INT,
+        ADD COLUMN IF NOT EXISTS week_of_year INT;
+        """
+    )
+
     conn.commit()  # commit the transaction to save changes
     cursor.close()  # close the cursor
     conn.close()  # close the connection
 
 def create_dim_metadata():
-    conn = psycopg2.connect(
-        host = os.getenv("DB_HOST"),
-        port = os.getenv("DB_PORT"),
-        dbname = os.getenv("DB_NAME"),
-        user = os.getenv("DB_USER"),
-        password = os.getenv("DB_PASSWORD")
-    )
+    conn = db_connect()
 
     cursor = conn.cursor()
 

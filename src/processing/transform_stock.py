@@ -25,8 +25,8 @@ def transform_stock_prices(filepath, symbol):
             "month" : pd.to_datetime(date).month,
             "year" : pd.to_datetime(date).year,
             "quarter" : ((pd.to_datetime(date).month - 1) // 3) + 1, # ensure the quarter is classified correctly
-            "day_of_week" : pd.to_datetime(date).day_name(),
-            "week_of_year" : pd.to_datetime(date).isocalendar().week
+            "day_of_week" : pd.to_datetime(date).dayofweek,   # Monday=0, Sunday=6
+            "week_of_year" : int(pd.to_datetime(date).isocalendar().week)   # typecasting to int to avoid pandas Int64 type which is not compatible with psycopg2 when loading into the database
         })
 
     df = pd.DataFrame(records)

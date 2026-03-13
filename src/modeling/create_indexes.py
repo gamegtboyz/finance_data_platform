@@ -1,8 +1,4 @@
-import psycopg2
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
+from db_connect import db_connect
 
 def create_indexes():
     """
@@ -10,13 +6,7 @@ def create_indexes():
     """
 
     # create the SQL connection
-    conn = psycopg2.connect(
-        host = os.getenv("DB_HOST"),
-        port = os.getenv("DB_PORT"),
-        dbname = os.getenv("DB_NAME"),
-        user = os.getenv("DB_user"),
-        password = os.getenv("DB_PASSWORD")
-    )
+    conn = db_connect()
 
     # create cursor object to interact with the SQL connection
     cursor = conn.cursor()
@@ -49,5 +39,5 @@ def create_indexes():
     cursor.close()
     conn.close()
     
-    if __name__ == "__main__":
-        create_indexes()
+if __name__ == "__main__":
+    create_indexes()

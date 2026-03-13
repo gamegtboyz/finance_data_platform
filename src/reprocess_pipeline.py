@@ -58,7 +58,7 @@ def reprocess(symbols):
             conn.commit()
 
             logging.info("Loading into fact table")
-            load_stock_prices(df)
+            load_stock_prices(cursor, df)
 
             logging.info(f"Reprocess completed for {symbol}")
 

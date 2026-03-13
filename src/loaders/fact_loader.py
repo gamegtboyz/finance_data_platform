@@ -26,3 +26,15 @@ def load_stock_prices(cursor, df):
     """
 
     execute_values(cursor, insert_query, values)
+
+def get_max_loaded_date(cursor, symbol):
+    """
+    Return the latest date already loaded for a symbol, or None if no data is loaded yet.
+    """
+    cursor.execute(
+        "SELECT MAX(date) FROM stock_prices WHERE symbol = %s;",
+        (symbol,)
+    )
+
+    result = cursor.fetchone()
+    return result[0]
