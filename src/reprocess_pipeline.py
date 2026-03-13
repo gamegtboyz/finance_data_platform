@@ -1,9 +1,9 @@
 import logging
 import os
 import glob
-import psycopg2
-from dotenv import load_dotenv
+import pathlib
 
+from db_connect import db_connect
 from processing.transform_stock import transform_stock_prices, transform_company_metadata
 from loaders.fact_loader import load_stock_prices
 from loaders.dimension_loader import load_dim_dates, load_dim_metadata
@@ -12,11 +12,9 @@ from modeling.create_fact_tables import create_fact_table
 
 logging.basicConfig(level=logging.INFO)
 
-load_dotenv()
-
 def get_latest_file(symbol):
     """Return the most recently dated OHLCV JSON file for a symbol."""
-    pattern = f"data/raw/{symbol}/{symbol}_*.json"
+    pattern = str(pathlib.Path(__file__).parent.parent / f"data/raw/{symbol}/{symbol}_*.json")
     files = [f for f in glob.glob(pattern) if "metadata" not in f]
     if not files:
         raise FileNotFoundError(f"No raw data files found for {symbol} at {pattern}")
@@ -24,19 +22,13 @@ def get_latest_file(symbol):
 
 def get_metadata_file(symbol):
     """Return the metadata JSON filepath for a symbol."""
-    filepath = f"data/raw/{symbol}/{symbol}_metadata.json"
+    filepath = str(pathlib.Path(__file__).parent.parent / f"data/raw/{symbol}/{symbol}_metadata.json")
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"No metadata file found for {symbol} at {filepath}")
     return filepath
 
 def reprocess(symbols):
-    conn = psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD")
-    )
+    conn = db_connect()
 
     cursor = conn.cursor()
 

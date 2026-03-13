@@ -20,7 +20,7 @@ def fetch_stock_prices(symbol):
         "outputsize": "compact"
     }
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=60)
     data = response.json()
     
     # Daily quota exceeded (free tier: 25 req/day). "Information" key is returned
@@ -32,14 +32,17 @@ def fetch_stock_prices(symbol):
     # add minute-wise rate limit handling
     if "Note" in data:
         logging.warning(f"API rate limit reached for {symbol}. Waiting 60 seconds...")
-        time.sleep(60)
-        return fetch_stock_prices(symbol)
+        attempt = 0
+        while attempt < 3:
+            time.sleep(12)
+            attempt += 1
+            return fetch_stock_prices(symbol)
+        raise RuntimeError(f"API rate limit reached for {symbol} after 3 attempts")
 
     # Check for other error messages
     if "Error Message" in data:
         logging.error(f"API error for {symbol}: {data['Error Message']}")
-        time.sleep(60)
-        return fetch_stock_prices(symbol)
+        raise RuntimeError(f"AlphaVantage API error for {symbol}: {data['Error Message']}")
     
     timestamp = datetime.utcnow().strftime("%Y-%m-%d")
 
@@ -64,7 +67,7 @@ def fetch_company_metadata(symbol):
         "apikey": API_KEY
     }
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=60)
     data = response.json()
 
     if "Information" in data:
