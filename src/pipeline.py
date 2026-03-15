@@ -52,7 +52,6 @@ def run(symbols):
             logger.info("Populating dimension tables")
             load_dim_dates(cursor, df)            
             load_dim_metadata(cursor, metadata)
-            conn.commit()
 
             # load the fact table with transformed data
             logger.info("Loading into fact table")

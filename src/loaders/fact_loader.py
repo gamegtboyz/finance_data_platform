@@ -1,4 +1,7 @@
 from psycopg2.extras import execute_values
+import logging
+
+logger = logging.getLogger(__name__)
 
 # open the connection to the PostgreSQL database using credentials from environment variables
 def load_stock_prices(cursor, df):
@@ -27,6 +30,7 @@ def load_stock_prices(cursor, df):
     """
 
     execute_values(cursor, insert_query, values)
+    logger.info(f"Loaded {len(values)} new rows into stock_prices")
 
 def get_max_loaded_date(cursor, symbol):
     """
@@ -38,4 +42,6 @@ def get_max_loaded_date(cursor, symbol):
     )
 
     result = cursor.fetchone()
-    return result[0]
+    max_date = result[0]
+    logger.info(f"Latest loaded date for {symbol}: {max_date}")
+    return max_date

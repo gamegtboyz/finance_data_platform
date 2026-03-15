@@ -1,4 +1,7 @@
 from psycopg2.extras import execute_values
+import logging
+
+logger = logging.getLogger(__name__)
 
 def load_dim_dates(cursor, df):
     """
@@ -17,6 +20,7 @@ def load_dim_dates(cursor, df):
     """
 
     execute_values(cursor, insert_query,values)
+    logger.info(f"Loaded {len(values)} rows into dim_date")
 
 def load_dim_metadata(cursor, metadata):
     cursor.execute(
@@ -27,3 +31,4 @@ def load_dim_metadata(cursor, metadata):
         """,
         (metadata["symbol"], metadata["company_name"], metadata["sector"])
     )
+    logger.info(f"Loaded metadata for {metadata['symbol']} into dim_metadata")
