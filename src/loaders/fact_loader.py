@@ -15,9 +15,10 @@ def load_stock_prices(cursor, df):
     # insert data into stock_prices table as a bulk
     # Convert all numpy types to Python native types to avoid psycopg2 adapter errors
     fact_columns = ["symbol", "date", "open", "high", "low", "close", "volume"]
-    df['date'] = df['date'].dt.to_pydatetime()  # numpy.datetime64 -> datetime
+    df_copy = df[fact_columns].copy()  # create a copy to avoid modifying the original DataFrame
+    df_copy['date'] = df_copy['date'].dt.to_pydatetime()  # numpy.datetime64 -> datetime
     # Use .values.tolist() to convert numpy types to native Python types
-    values = [tuple(row) for row in df[fact_columns].values.tolist()]
+    values = [tuple(row) for row in df_copy[fact_columns].values.tolist()]
 
     insert_query = """
         INSERT INTO stock_prices (symbol, date, open, high, low, close, volume)
