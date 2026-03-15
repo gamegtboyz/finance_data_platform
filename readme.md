@@ -64,7 +64,12 @@ python -m src.pipeline
 ## Running Tests
 This project also includes unit tests for data transformations.
 ```bash
+# use this one to run everything
 pytest tests/ -v
+
+# use this one to only run on the integration tests
+# make sure the docker PostgreSQL container is running. Otherwise run docker compose up -d
+pytest tests/ -v -m integration
 ```
 
 ## Project Structure

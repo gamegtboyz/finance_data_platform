@@ -3,7 +3,7 @@ import psycopg2
 from src.db_connect import db_connect
 
 def pytest_configure(config):
-    config.addinvalue_line(
+    config.addinivalue_line(
         "markers", "integration: mark a test as an integration test that requiring a live PostgreSQL connection (docker compose up -d)"
     )
 
@@ -50,6 +50,22 @@ def db_cursor():
             symbol         TEXT PRIMARY KEY,
             company_name   TEXT,
             sector         TEXT
+        );
+        """
+    )
+
+    # create temp fact table
+    cursor.execute(
+        """
+        CREATE TEMP TABLE stock_prices (
+            symbol         TEXT,
+            date           DATE,
+            open           NUMERIC,
+            high           NUMERIC,
+            low            NUMERIC,
+            close          NUMERIC,
+            volume         BIGINT,
+            PRIMARY KEY (symbol, date)
         );
         """
     )
