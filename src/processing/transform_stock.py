@@ -13,20 +13,21 @@ def transform_stock_prices(filepath, symbol):
     records = []
 
     for date, values in time_series.items():
+        dt = pd.to_datetime(date)
         records.append({
             "symbol": symbol,   # pass the argument symbol to the function and include it in the records
-            "date": date,       # convert the date string to a datetime object
+            "date": dt,       # convert the date string to a datetime object
             "open": float(values["1. open"]),
             "high": float(values["2. high"]),
             "low": float(values["3. low"]),
             "close": float(values["4. close"]),
             "volume": int(values["5. volume"]),
-            "day" : pd.to_datetime(date).day,
-            "month" : pd.to_datetime(date).month,
-            "year" : pd.to_datetime(date).year,
-            "quarter" : ((pd.to_datetime(date).month - 1) // 3) + 1, # ensure the quarter is classified correctly
-            "day_of_week" : pd.to_datetime(date).dayofweek,   # Monday=0, Sunday=6
-            "week_of_year" : int(pd.to_datetime(date).isocalendar().week)   # typecasting to int to avoid pandas Int64 type which is not compatible with psycopg2 when loading into the database
+            "day" : dt.day,
+            "month" : dt.month,
+            "year" : dt.year,
+            "quarter" : ((dt.month - 1) // 3) + 1, # ensure the quarter is classified correctly
+            "day_of_week" : dt.dayofweek,   # Monday=0, Sunday=6
+            "week_of_year" : int(dt.isocalendar().week)   # typecasting to int to avoid pandas Int64 type which is not compatible with psycopg2 when loading into the database
         })
 
     df = pd.DataFrame(records)
