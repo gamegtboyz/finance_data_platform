@@ -2,10 +2,10 @@ import logging
 import time
 
 from db_connect import db_connect
-from ingestion.alphavantage_ingest import fetch_stock_prices, fetch_company_metadata
-from processing.transform_stock import transform_stock_prices, transform_company_metadata
-from loaders.fact_loader import load_stock_prices, get_max_loaded_date
-from loaders.dimension_loader import load_dim_dates, load_dim_metadata
+from extract.alphavantage_ingest import fetch_stock_prices, fetch_company_metadata
+from transform.transform_stock import transform_stock_prices, transform_company_metadata
+from load.fact_loader import load_stock_prices, get_max_loaded_date
+from load.dimension_loader import load_dim_dates, load_dim_metadata
 from modeling.create_dimension_tables import create_dim_dates, create_dim_metadata
 from modeling.create_fact_tables import create_fact_table
 from modeling.create_indexes import create_indexes
