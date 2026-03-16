@@ -116,13 +116,13 @@ finance_data_platform/
 │   ├── pipeline.py                # Main ETL orchestration (fetch → transform → load)
 │   ├── reprocess_pipeline.py      # Load from local files without API calls
 │   │
-│   ├── ingestion/
+│   ├── extract/
 │   │   └── alphavantage_ingest.py # API fetch with rate-limit retry and quota detection
 │   │
-│   ├── processing/
+│   ├── transform/
 │   │   └── transform_stock.py     # OHLCV + calendar attribute derivation; metadata parsing
 │   │
-│   ├── loaders/
+│   ├── load/
 │   │   ├── dimension_loader.py    # Bulk-insert dim_date and dim_metadata (ON CONFLICT DO NOTHING)
 │   │   └── fact_loader.py         # Bulk-insert stock_prices; get_max_loaded_date for incremental load
 │   │
