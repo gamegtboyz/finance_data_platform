@@ -29,13 +29,11 @@ def fetch_stock_prices(symbol):
     response.raise_for_status()
     data = response.json()
 
-    # Daily quota exceeded (free tier: 25 req/day). "Information" key is returned
-    # instead of "Note" when the per-day limit is hit — this is distinct from the
-    # per-minute rate limit and cannot be resolved by waiting.
+    # AlphaVantage returns the "Information" in case that the request wasn't fulfilled e.g. attempting intraday data with free-tier API keys
     if "Information" in data:
         raise RuntimeError(f"AlphaVantage daily quota exceeded for {symbol}: {data['Information']}")
 
-    # Per-minute rate limit: retry up to 3 times with 60-second backoff.
+    # In case exceeding usage quota, AlphaVantage returns "Note" response. So we could wait and retry for a few times.
     if "Note" in data:
         for attempt in range(1, 4):
             logger.warning(f"API rate limit reached for {symbol}. Attempt {attempt}/3 — waiting 60 seconds...")
@@ -49,7 +47,7 @@ def fetch_stock_prices(symbol):
         else:
             raise RuntimeError(f"API rate limit for {symbol} persisted after 3 retry attempts")
 
-    # Check for other error messages
+    # In case that request is invalid or cannot be processed, return "Error Message"
     if "Error Message" in data:
         logger.error(f"API error for {symbol}: {data['Error Message']}")
         raise RuntimeError(f"AlphaVantage API error for {symbol}: {data['Error Message']}")
