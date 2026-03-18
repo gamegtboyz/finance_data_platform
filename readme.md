@@ -13,7 +13,10 @@ Transformation (transform of tabular format)
 PostgreSQL Data Warehouse  
 ├── dim_date (date PK, day, month, year, quarter, day_of_week, week_of_year)  
 ├── dim_metadata (symbol PK, company_name, and its sector)  
-└── stock_prices (symbol + date PK, OHLCV tect tables)
+└── stock_prices (symbol + date PK, OHLCV tect tables)  
+↓  
+SQL analytics query  
+*query the data from SQL database, then save the results as .csv files*
 
 ## Tech Stack
 | Layer | Tool |
@@ -21,6 +24,7 @@ PostgreSQL Data Warehouse
 | Language | Python 3.9+ |
 | Database | PostgreSQL 15 |
 | DB driver | psycopg2-binary |
+| DB Toolkit | SQLAlchemy |
 | Data processing | pandas, numpy |
 | HTTP | requests |
 | Config | python-dotenv |
@@ -100,21 +104,25 @@ pytest tests/ -v -m integration
 ## Project Structure
 ```
 finance_data_platform/
-├── docker-compose.yml
-├── requirements.txt
-├── .env.example
+├── docker-compose.yml             # Docker container property
+├── requirements.txt               # Dependency used in this project
+├── .env.example                   # Dummy .env file for git cloners
 │
 ├── sql/
-│   └── analytics.sql              # Window function queries: SMA, daily returns, volatility, cumulative returns
+│   └── sma.sql                    # Calculate SMA5 and SMA20
+│   └── daily_returns.sql          # Calculate daily returns
+│   └── volatility.sql             # Calculate volatility (standard deviation) of the returns from last 21 trading days
+│   └── cumulative_return.sql      # Calculate cumulative returns of the stocks from the earliest OHLCV data of stocks
 │
 ├── data/
 │   ├── raw/{symbol}/              # Raw JSON responses from AlphaVantage
-│   └── processed/                 # Reserved for future use
+│   └── analytics/                 # Extracted files for SQL query
 │
 ├── src/
 │   ├── db_connect.py              # psycopg2 connection factory (reads from .env)
 │   ├── pipeline.py                # Main ETL orchestration (fetch → transform → load)
 │   ├── reprocess_pipeline.py      # Load from local files without API calls
+│   ├── export_analytics.py        # Save the SQL query into .csv file
 │   │
 │   ├── extract/
 │   │   └── alphavantage_ingest.py # API fetch with rate-limit retry and quota detection
@@ -127,9 +135,9 @@ finance_data_platform/
 │   │   └── fact_loader.py         # Bulk-insert stock_prices; get_max_loaded_date for incremental load
 │   │
 │   └── modeling/
-│       ├── create_dimension_tables.py
-│       ├── create_fact_tables.py
-│       └── create_indexes.py
+│       ├── create_dimension_tables.py      # verify and create dimension (date, metadata) tables
+│       ├── create_fact_tables.py           # verify and create fact tables
+│       └── create_indexes.py               # create performance index on fact tables
 │
 └── tests/
     ├── conftest.py                # db_cursor fixture — isolated TEMP tables per test

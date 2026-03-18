@@ -2,3 +2,4 @@
 learning_roadmap.md
 */__pycache__*
 data/raw/*/*.json
+results.txt
