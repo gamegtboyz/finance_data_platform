@@ -26,7 +26,7 @@ def db_cursor():
 
     """
     TEMP tables are session-scoped and don't support cross-table foreign keys (FK) constraints,
-    so they are defined without then here. They are auto-dropped when the connection is closed .
+    so they are defined without them here. They are auto-dropped when the connection is closed .
     """
     # create temp date dimension table
     cursor.execute(
@@ -70,7 +70,7 @@ def db_cursor():
         """
     )
 
-    yield cursor    # yield the cursor to the test function, then after the test function finishes, execution will resume here
+    yield cursor    # yield the cursor to the test function. This was used to separate the setup and teardown logic, which is a best practice for test fixtures.
     conn.rollback() # rollback any changes to ensure test isolation
     cursor.close()
     conn.close()

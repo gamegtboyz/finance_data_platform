@@ -193,7 +193,6 @@ class TestTransformCompanyMetadata:
         finally:
             os.unlink(temp_filepath)
 
-
 class TestTransformStockPricesEdgeCases:
 
     def test_empty_time_series_returns_empty_dataframe(self):
