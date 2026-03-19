@@ -122,7 +122,7 @@ finance_data_platform/
 │   ├── db_connect.py              # psycopg2 connection factory (reads from .env)
 │   ├── pipeline.py                # Main ETL orchestration (fetch → transform → load)
 │   ├── reprocess_pipeline.py      # Load from local files without API calls
-│   ├── export_analytics.py        # Save the SQL query into .csv file
+│   ├── analytics.py               # Save the SQL query into .csv file
 │   │
 │   ├── extract/
 │   │   └── alphavantage_ingest.py # API fetch with rate-limit retry and quota detection
