@@ -34,13 +34,14 @@ def load_stock_prices(cursor, df):
 
 def get_max_loaded_date(cursor, symbol):
     """
-    Return the latest date already loaded for a symbol, or None if no data is loaded yet.
+    Check for latest date already loaded for the symbol in the fact table.
     """
     cursor.execute(
         "SELECT MAX(date) FROM stock_prices WHERE symbol = %s;",
         (symbol,)
     )
 
+    # fetchone() returns a tuple, we want the first element which is the max date
     result = cursor.fetchone()
     max_date = result[0]
     logger.info(f"Latest loaded date for {symbol}: {max_date}")
