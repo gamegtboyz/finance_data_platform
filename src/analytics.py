@@ -1,6 +1,5 @@
 import pandas as pd
 from pathlib import Path
-from db_connect import db_connect
 import logging
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
@@ -27,16 +26,13 @@ QUERIES = {
 OUTPUT_DIR = Path("data/analytics")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# connect to the database and execute each query, saving the results as CSV files
-conn = db_connect()
-
 # execute each query and save the results to CSV files
-for name, sql_path in QUERIES.items():
-    query = sql_path.read_text()
-    df = pd.read_sql_query(query, conn)
-    output = OUTPUT_DIR / f"{name}.csv"
-    df.to_csv(output, index=False)
-    logger.info(f"Exported {name} to {output}")
-
-# close the database connection
-engine.dispose()
+try:
+    for name, sql_path in QUERIES.items():
+        query = sql_path.read_text()
+        df = pd.read_sql_query(query, engine)
+        output = OUTPUT_DIR / f"{name}.csv"
+        df.to_csv(output, index=False)
+        logger.info(f"Exported {name} to {output}")
+finally:
+    engine.dispose()

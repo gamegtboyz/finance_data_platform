@@ -1,11 +1,12 @@
 import requests
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 import logging
 import pathlib
 from dotenv import load_dotenv
+from storage.s3_client import s3_upload
 
 load_dotenv()   # load environment variables from .env file
 
@@ -52,13 +53,19 @@ def fetch_stock_prices(symbol):
         logger.error(f"API error for {symbol}: {data['Error Message']}")
         raise RuntimeError(f"AlphaVantage API error for {symbol}: {data['Error Message']}")
 
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d")
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     filepath = RAW_DATA_DIR / symbol / f"{symbol}_{timestamp}.json"
     filepath.parent.mkdir(parents=True, exist_ok=True)
 
     with open(filepath, "w") as f:
         json.dump(data, f)
+
+    # Upload the file to S3
+    try:
+        s3_upload(str(filepath), os.getenv('S3_BUCKET_NAME'), f"{symbol}/{filepath.name}")
+    except Exception as e:
+        logger.warning(f"Failed to upload file to S3 for {symbol}: {str(e)}")
 
     return str(filepath)
 
@@ -99,5 +106,11 @@ def fetch_company_metadata(symbol):
 
     with open(filepath, "w") as f:
         json.dump(data, f)
+
+    # Upload the file to S3
+    try:
+        s3_upload(str(filepath), os.getenv('S3_BUCKET_NAME'), f"{symbol}/{filepath.name}")
+    except Exception as e:
+        logger.warning(f"Failed to upload file to S3 for {symbol}: {str(e)}")
 
     return str(filepath)
