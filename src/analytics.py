@@ -23,16 +23,17 @@ QUERIES = {
 }
 
 # create output directory to save the analytics results
-OUTPUT_DIR = Path("data/analytics")
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+if __name__ == "__main__":
+    OUTPUT_DIR = Path("data/analytics")
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# execute each query and save the results to CSV files
-try:
-    for name, sql_path in QUERIES.items():
-        query = sql_path.read_text()
-        df = pd.read_sql_query(query, engine)
-        output = OUTPUT_DIR / f"{name}.csv"
-        df.to_csv(output, index=False)
-        logger.info(f"Exported {name} to {output}")
-finally:
-    engine.dispose()
+    # execute each query and save the results to CSV files
+    try:
+        for name, sql_path in QUERIES.items():
+            query = sql_path.read_text()
+            df = pd.read_sql_query(query, engine)
+            output = OUTPUT_DIR / f"{name}.csv"
+            df.to_csv(output, index=False)
+            logger.info(f"Exported {name} to {output}")
+    finally:
+        engine.dispose()
