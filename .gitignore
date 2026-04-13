@@ -5,3 +5,4 @@ data/raw/*/*.json
 results.txt
 *memo.md
 agentic_trading_systems_design.md
+test_redshift_connection.py
