@@ -20,10 +20,10 @@ CREATE_FACT_STOCK_PRICES = """
 CREATE TABLE IF NOT EXISTS stock_prices (
     symbol      VARCHAR(20)     NOT NULL ENCODE lzo,
     date        DATE            NOT NULL ENCODE az64,
-    "open"        NUMERIC(12,4)   ENCODE az64,
+    "open"      NUMERIC(12,4)   ENCODE az64,
     high        NUMERIC(12,4)   ENCODE az64,
     low         NUMERIC(12,4)   ENCODE az64,
-    "close"       NUMERIC(12,4)   ENCODE az64,
+    "close"     NUMERIC(12,4)   ENCODE az64,
     volume      BIGINT          ENCODE az64,
     PRIMARY KEY (symbol, date)
 )
@@ -54,6 +54,20 @@ CREATE TABLE IF NOT EXISTS dim_metadata (
     PRIMARY KEY (symbol)
 )
 DISTSTYLE ALL;
+"""
+
+# staging table as required by redshift. 
+CREATE_STAGING_STOCK_PRICES = """
+CREATE TABLE IF NOT EXISTS staging_stock_prices (
+    symbol      VARCHAR(20)     ENCODE lzo,
+    date        DATE            ENCODE az64,
+    "open"      NUMERIC(12,4)   ENCODE az64,
+    high        NUMERIC(12,4)   ENCODE az64,
+    low         NUMERIC(12,4)   ENCODE az64,
+    "close"     NUMERIC(12,4)   ENCODE az64,
+    volume      BIGINT          ENCODE az64
+)
+DISTSTYLE EVEN;
 """
 
 def create_redshift_schema():

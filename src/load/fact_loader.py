@@ -1,10 +1,27 @@
+import os
+import json
+import tempfile
 from psycopg2.extras import execute_values
 import logging
+from datetime import datetime, timezone
+from dotenv import load_dotenv
 
+from load.redshift_copy_loader import copy_json_from_s3
+from storage.s3_client import s3_upload
+
+load_dotenv()
 logger = logging.getLogger(__name__)
 
+# selector function to choose either Postgres or Redshift loader based on environment variable
+def load_stock_prices(cursor,df,conn=None):
+    engine = os.getenv("DB_ENGINE", "postgres")
+    if engine == "redshift":
+        _load_stock_prices_redshift(cursor, df, conn)
+    if engine == "postgres":
+        _load_stock_prices_postgres(cursor, df)
+
 # open the connection to the PostgreSQL database using credentials from environment variables
-def load_stock_prices(cursor, df):
+def _load_stock_prices_postgres(cursor, df):
     """
     we used to create the connection and cursor inside this function
     but we moed it out to pipeline.py for maintainability purposes
@@ -31,6 +48,52 @@ def load_stock_prices(cursor, df):
 
     execute_values(cursor, insert_query, values)
     logger.info(f"Loaded {len(values)} new rows into stock_prices")
+
+def _load_stock_prices_redshift(cursor, df, conn):
+    """
+
+    """
+
+    fact_columns = ["symbol", "date", "open", "high", "low", "close", "volume"]
+    df_copy = df[fact_columns].copy()  # create a copy to avoid modifying the original DataFrame
+    df_copy['date'] = df_copy['date'].dt.to_pydatetime() # convert numpy datetime to python datetime for json serialization
+
+    # 1. Serialize DataFrame to JSONLines and upload to S3 staging prefix
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    s3_key = f"staging/stock_prices/{timestamp}.jsonl"
+    local_tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False)
+
+    for record in df_copy[fact_columns].to_dict(orient="records"):
+        local_tmp.write(json.dumps(record) + "\n")
+    local_tmp.close() # close the file to flush the buffer and make it available for upload
+
+    s3_upload(local_tmp.name, os.getenv("S3_BUCKET_NAME"), s3_key) # upload the local temp file to S3 staging area
+    os.unlink(local_tmp.name) # delete the local temp file after upload
+
+    # 2. COPY into staging table (always start clean for idempotency)
+    cursor.execute("TRUNCATE TABLE staging_stock_prices;") # clear staging table before loading new data
+    copy_json_from_s3(cursor, "staging_stock_prices", s3_key)
+
+    # 3. DELETE matching rows from target → idempotency
+    cursor.execute(
+        """
+        DELETE FROM stock_prices
+        USING staging_stock_prices
+        WHERE stock_prices.symbol = staging_stock_prices.symbol
+        AND stock_prices.date = staging_stock_prices.date;
+        """
+    )
+
+    # 4. INSERT from staging into target
+    cursor.execute(
+        """
+        INSERT INTO stock_prices (symbol, date, open, high, low, close, volume)
+        SELECT symbol, date, open, high, low, close, volume
+        FROM staging_stock_prices;
+        """
+    )
+
+    logger.info(f"Loaded {len(df_copy)} rows into stock_prices via Redshift COPY")
 
 def get_max_loaded_date(cursor, symbol):
     """
