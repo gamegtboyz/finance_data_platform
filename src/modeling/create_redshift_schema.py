@@ -56,11 +56,11 @@ CREATE TABLE IF NOT EXISTS dim_metadata (
 DISTSTYLE ALL;
 """
 
-# staging table as required by redshift. 
+# create staging table as required by redshift on both fact and dimension tables
 CREATE_STAGING_STOCK_PRICES = """
 CREATE TABLE IF NOT EXISTS staging_stock_prices (
-    symbol      VARCHAR(20)     ENCODE lzo,
-    date        DATE            ENCODE az64,
+    symbol      VARCHAR(20)     NOT NULL ENCODE lzo,
+    date        DATE            NOT NULL ENCODE az64,
     "open"      NUMERIC(12,4)   ENCODE az64,
     high        NUMERIC(12,4)   ENCODE az64,
     low         NUMERIC(12,4)   ENCODE az64,
@@ -69,6 +69,10 @@ CREATE TABLE IF NOT EXISTS staging_stock_prices (
 )
 DISTSTYLE EVEN;
 """
+
+CREATE_STAGING_DIM_DATE = "CREATE TABLE IF NOT EXISTS staging_dim_date (LIKE dim_date) DISTSTYLE EVEN;"
+
+CREATE_STAGING_DIM_METADATA = "CREATE TABLE IF NOT EXISTS staging_dim_metadata (LIKE dim_metadata) DISTSTYLE EVEN;"
 
 def create_redshift_schema():
     conn = db_connect()
