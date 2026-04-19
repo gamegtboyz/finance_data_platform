@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def load_stock_prices(cursor,df,conn=None):
     engine = os.getenv("DB_ENGINE", "postgres")
     if engine == "redshift":
-        _load_stock_prices_redshift(cursor, df, conn)
+        _load_stock_prices_redshift(cursor, df)
     if engine == "postgres":
         _load_stock_prices_postgres(cursor, df)
 
@@ -49,9 +49,12 @@ def _load_stock_prices_postgres(cursor, df):
     execute_values(cursor, insert_query, values)
     logger.info(f"Loaded {len(values)} new rows into stock_prices")
 
-def _load_stock_prices_redshift(cursor, df, conn):
+def _load_stock_prices_redshift(cursor, df):
     """
-
+    Redshift COPY is optimized for bulk loading large datasets, so we:
+    1. Serialize the DataFrame to JSONLines format and upload to S3 staging area
+    2. Use Redshift COPY command to load from S3 into a staging table
+    3. merge from staging table to target fact table with idempotent logic (delete matching keys before insert)
     """
 
     fact_columns = ["symbol", "date", "open", "high", "low", "close", "volume"]
