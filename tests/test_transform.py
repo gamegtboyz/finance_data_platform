@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import tempfile
 import os
-from src.transform.transform_stock import transform_stock_prices, transform_company_metadata
+from transform.transform_stock import transform_stock_prices, transform_company_metadata
 
 
 # we focused on testing on transformation phase. So, each class represents testing process on transformation method.

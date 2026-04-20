@@ -88,6 +88,12 @@ def create_redshift_schema():
         logger.info("Creating dim_metadata table in Redshift...")
         cursor.execute(CREATE_DIM_METADATA)
 
+        # create staging tables for Redshift COPY loading
+        logger.info("Creating staging tables for Redshift COPY loading...")
+        cursor.execute(CREATE_STAGING_STOCK_PRICES)
+        cursor.execute(CREATE_STAGING_DIM_DATE)
+        cursor.execute(CREATE_STAGING_DIM_METADATA)
+
         conn.commit()
         logger.info("Redshift schema created successfully.")
     

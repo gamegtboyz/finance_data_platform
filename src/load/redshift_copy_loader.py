@@ -38,3 +38,22 @@ def copy_json_from_s3(cursor, table_name:str, s3_key:str) -> None:
     logger.info(f"Executing COPY into {table_name} from {s3_url}")
     cursor.execute(copy_sql)
     logger.info(f"COPY complete for {table_name}")
+
+def vacuum_analyze(conn, table_name: str) -> None:
+    """
+    As DELETE mechanism in _load_stock_prices_redshift is a soft delete, we need to VACUUM to reclaim the disk blocks.
+    Then ANALYZE to update the table statistics for the query planner.
+    It must run outside a transaction -- sets autocommit temporalily.
+    """
+
+    original_autocommit = conn.autocommit       # create and store original autocommit setting
+    conn.autocommit = True                      # set autocommit to True to run VACUUM and ANALYZE outside of a transaction 
+    cursor = conn.cursor()
+    try:
+        logger.info(f"VACUUM SORT ONLY {table_name}...")
+        cursor.execute(f"VACUUM SORT ONLY {table_name};")
+        logger.info(f"ANALYZE {table_name}...")
+        cursor.execute(f"ANALYZE {table_name};")
+    finally:
+        cursor.close()
+        conn.autocommit = original_autocommit   # restore original autocommit setting

@@ -17,7 +17,7 @@ def load_stock_prices(cursor,df,conn=None):
     engine = os.getenv("DB_ENGINE", "postgres")
     if engine == "redshift":
         _load_stock_prices_redshift(cursor, df)
-    if engine == "postgres":
+    elif engine == "postgres":
         _load_stock_prices_postgres(cursor, df)
 
 # open the connection to the PostgreSQL database using credentials from environment variables
@@ -59,14 +59,17 @@ def _load_stock_prices_redshift(cursor, df):
 
     fact_columns = ["symbol", "date", "open", "high", "low", "close", "volume"]
     df_copy = df[fact_columns].copy()  # create a copy to avoid modifying the original DataFrame
-    df_copy['date'] = df_copy['date'].dt.to_pydatetime() # convert numpy datetime to python datetime for json serialization
+    df_copy['date'] = df_copy['date'].dt.strftime("%Y-%m-%d")
 
     # 1. Serialize DataFrame to JSONLines and upload to S3 staging prefix
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     s3_key = f"staging/stock_prices/{timestamp}.jsonl"
     local_tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False)
 
-    for record in df_copy[fact_columns].to_dict(orient="records"):
+    values_list = df_copy[fact_columns].values.tolist() # convert numpy to python native types
+    columns_list = df_copy[fact_columns].columns.tolist()
+    for row in values_list:
+        record = dict(zip(columns_list, row))
         local_tmp.write(json.dumps(record) + "\n")
     local_tmp.close() # close the file to flush the buffer and make it available for upload
 

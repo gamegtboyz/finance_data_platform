@@ -1,6 +1,6 @@
 import pytest
 import psycopg2
-from src.db_connect import db_connect
+from db_connect import db_connect
 
 def pytest_configure(config):
     config.addinivalue_line(

@@ -10,7 +10,7 @@ def load_dim_dates(cursor, df):
     engine = os.getenv("DB_ENGINE", "postgres")
     if engine == "redshift":
         _load_dim_dates_redshift(cursor, df)
-    if engine == "postgres":
+    elif engine == "postgres":
         _load_dim_dates_postgres(cursor, df)
 
 def _load_dim_dates_redshift(cursor, df):
@@ -56,8 +56,8 @@ def _load_dim_dates_postgres(cursor, df):
 def load_dim_metadata(cursor, metadata):
     engine = os.getenv("DB_ENGINE", "postgres")
     if engine == "redshift":
-        None
-    if engine == "postgres":
+        _load_dim_metadata_redshift(cursor, metadata)
+    elif engine == "postgres":
         _load_dim_metadata_postgres(cursor, metadata)
 
 def _load_dim_metadata_redshift(cursor, metadata):

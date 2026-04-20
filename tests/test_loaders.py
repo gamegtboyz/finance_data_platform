@@ -2,8 +2,8 @@ import pytest
 import pandas as pd
 from datetime import date
 
-from src.load.fact_loader import load_stock_prices, get_max_loaded_date
-from src.load.dimension_loader import load_dim_dates, load_dim_metadata
+from load.fact_loader import load_stock_prices, get_max_loaded_date
+from load.dimension_loader import load_dim_dates, load_dim_metadata
 
 # define the helper functions for further testing as show below
 def _dim_date_row(date_str):
