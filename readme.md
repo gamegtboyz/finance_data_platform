@@ -1,19 +1,23 @@
 # Financial Data Platform Project
-A production-style batch ETL pipeline for financial stock data, built with Python and PostgreSQL. Demonstrates professional data engineering practices: star schema design, incremental loading, idempotent writes, structured logging, error handling, and a full integration test suite.
+A production-style batch ETL pipeline for financial stock data, built with Python, PostgreSQL, and AWS (S3 + Redshift). Demonstrates professional data engineering practices: star schema design, cloud-native bulk loading via Redshift COPY, incremental loading, idempotent writes, structured logging, error handling, and a full integration test suite.
 
 ## Architecture
 Public API (AlphaVantage)  
 ↓  
 Ingestion (fetch_stock_prices(), fetch_company_metadata())  
-*rate-limit handling • daily data detection • local JSON persistence*  
+*rate-limit handling • daily data detection • dual-write (local and S3)*  
+↓  
+S3 Raw Layer s3://finance-data-platform-raw/{symbols}/{symbols}_YYYY-MM-DD.json  
 ↓  
 Transformation (transform of tabular format)  
 *Type casting • calendar attribute derivation • metadata validation*  
 ↓  
-PostgreSQL Data Warehouse  
-├── dim_date (date PK, day, month, year, quarter, day_of_week, week_of_year)  
-├── dim_metadata (symbol PK, company_name, and its sector)  
-└── stock_prices (symbol + date PK, OHLCV tect tables)  
+Redshift COPY (via IAM role) ← S3 staging prefix  
+↓  
+Redshift Serverless Data Warehouse  
+├── dim_date (DISTSTYLE ALL, SORTKEY date)  
+├── dim_metadata (DISTSTYLE ALL)  
+└── stock_prices (DISTSTYLE symbol, SORTKEY date)  
 ↓  
 SQL analytics query  
 *query the data from SQL database, then save the results as .csv files*
@@ -22,22 +26,52 @@ SQL analytics query
 | Layer | Tool |
 |---|---|
 | Language | Python 3.9+ |
-| Database | PostgreSQL 15 |
-| DB driver | psycopg2-binary |
+| Local Database | PostgreSQL 15 |
+| Cloud Database | Amazon Redshift Serverless |
+| Cloud Storage | AWS S3 | 
+| AWS SDK | boto 3 |
+| DB driver (PostgreSQL) | psycopg2-binary |
+| DB driver (Redshift) | redshift-connector |
 | DB Toolkit | SQLAlchemy |
 | Data processing | pandas, numpy |
 | HTTP | requests |
 | Config | python-dotenv |
 | Containerisation | Docker / Docker Compose |
-| Testing | pytest |
-
+| Testing | pytest, moto |
 ---
+
 ## Prerequisites
 - Python 3.9 or later
-- Docker Desktop (for PostgreSQL container)
+- Docker Desktop (for local PostgreSQL mode)
 - AlphaVantageAPI (free API key here: https://www.alphavantage.co/support/#api-key)
+- AWS account with S3 and Redshift Serverless provisioined (for cloud mode -- see AWS setup below)
 
-## Setup
+## AWS Setup
+Follow these steps once before running in Redshift mode.  
+**1. S3**  
+- Create bucket `finance-data-platform-raw`; enable data versioning
+- Prefix conventions: `./{symbol}/{symbol}_YYYY-MM-DD.json` and `./{symbol}/{symbol}_metadata.json`
+
+**2. IAM -- Pipeline user (local → S3)**
+- Create policy `FinancePipelineS3Policy` with `s3:GetObject`, `s3:PutObject`, `s3:Listbicket` scoped to our target bucket only.
+- Create IAM user `finance-pipeline-local`; attach only the created policy
+- Generate access keys; store in `.env` -- never commit via `./.gitignore`
+
+**3. IAM -- Redshift Role (Redshift → S3)**  
+- Create role `RedshiftS3ReadRole` with Redshift service trust policy + read-only access to the raw bucket
+- Attach the role to your Redshift Serverless namespace
+
+**4. Redshift Serverless**
+- Provision a Serverless workgroup (8RPUs recommended); set auto-pause to 15 minutes idling time.
+- Open the workgroup's security group inbound rule: port 5439 from your local IP address
+- Confirm the pulbic endpoint is enabled
+
+**5. Cost controls**
+- Create an AWS Budgets alerts (estimated by $5 per month solely from this project)
+
+
+
+## Local Setup
 **1. Clone the repository**
 ```bash
 gh repo clone gamegtboyz/finance_data_platform
