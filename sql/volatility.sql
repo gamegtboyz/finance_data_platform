@@ -2,7 +2,7 @@ WITH daily_returns AS (
     SELECT
         s.symbol,
         s.date,
-        (s.close / LAG(s.close) OVER (PARTITION BY s.symbol ORDER BY s.date ASC)) - 1 AS daily_return
+        (s.close_price / LAG(s.close_price) OVER (PARTITION BY s.symbol ORDER BY s.date ASC)) - 1 AS daily_return
     FROM stock_prices s
 )
 

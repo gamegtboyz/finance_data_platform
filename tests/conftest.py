@@ -60,10 +60,10 @@ def db_cursor():
         CREATE TEMP TABLE stock_prices (
             symbol         TEXT,
             date           DATE,
-            open           NUMERIC,
+            open_price     NUMERIC,
             high           NUMERIC,
             low            NUMERIC,
-            close          NUMERIC,
+            close_price    NUMERIC,
             volume         BIGINT,
             PRIMARY KEY (symbol, date)
         );

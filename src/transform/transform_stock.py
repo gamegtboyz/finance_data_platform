@@ -17,10 +17,10 @@ def transform_stock_prices(filepath, symbol):
         records.append({
             "symbol": symbol,   # pass the argument symbol to the function and include it in the records
             "date": dt,       # convert the date string to a datetime object
-            "open": float(values["1. open"]),
+            "open_price": float(values["1. open"]),
             "high": float(values["2. high"]),
             "low": float(values["3. low"]),
-            "close": float(values["4. close"]),
+            "close_price": float(values["4. close"]),
             "volume": int(values["5. volume"]),
             "day" : dt.day,
             "month" : dt.month,

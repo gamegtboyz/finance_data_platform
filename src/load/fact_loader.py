@@ -34,14 +34,14 @@ def _load_stock_prices_postgres(cursor, df):
 
     # insert data into stock_prices table as a bulk
     # Convert all numpy types to Python native types to avoid psycopg2 adapter errors
-    fact_columns = ["symbol", "date", "open", "high", "low", "close", "volume"]
+    fact_columns = ["symbol", "date", "open_price", "high", "low", "close_price", "volume"]
     df_copy = df[fact_columns].copy()  # create a copy to avoid modifying the original DataFrame
     df_copy['date'] = df_copy['date'].dt.to_pydatetime()  # numpy.datetime64 -> datetime
     # Use .values.tolist() to convert numpy types to native Python types
     values = [tuple(row) for row in df_copy[fact_columns].values.tolist()]
 
     insert_query = """
-        INSERT INTO stock_prices (symbol, date, open, high, low, close, volume)
+        INSERT INTO stock_prices (symbol, date, open_price, high, low, close_price, volume)
         VALUES %s
         ON CONFLICT (symbol, date) DO NOTHING
     """
@@ -57,7 +57,7 @@ def _load_stock_prices_redshift(cursor, df):
     3. merge from staging table to target fact table with idempotent logic (delete matching keys before insert)
     """
 
-    fact_columns = ["symbol", "date", "open", "high", "low", "close", "volume"]
+    fact_columns = ["symbol", "date", "open_price", "high", "low", "close_price", "volume"]
     df_copy = df[fact_columns].copy()  # create a copy to avoid modifying the original DataFrame
     df_copy['date'] = df_copy['date'].dt.strftime("%Y-%m-%d")
 
@@ -93,8 +93,8 @@ def _load_stock_prices_redshift(cursor, df):
     # 4. INSERT from staging into target
     cursor.execute(
         """
-        INSERT INTO stock_prices (symbol, date, open, high, low, close, volume)
-        SELECT symbol, date, open, high, low, close, volume
+        INSERT INTO stock_prices (symbol, date, open_price, high, low, close_price, volume)
+        SELECT symbol, date, open_price, high, low, close_price, volume
         FROM staging_stock_prices;
         """
     )
