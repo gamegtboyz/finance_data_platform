@@ -61,7 +61,7 @@ def fetch_stock_prices(symbol):
     with open(filepath, "w") as f:
         json.dump(data, f)
 
-    # Upload the file to S3
+    # Upload the file to S3 bucket
     try:
         s3_upload(str(filepath), os.getenv('S3_BUCKET_NAME'), f"{symbol}/{filepath.name}")
     except Exception as e:
@@ -107,7 +107,7 @@ def fetch_company_metadata(symbol):
     with open(filepath, "w") as f:
         json.dump(data, f)
 
-    # Upload the file to S3
+    # Upload the file to S3 bucket
     try:
         s3_upload(str(filepath), os.getenv('S3_BUCKET_NAME'), f"{symbol}/{filepath.name}")
     except Exception as e:
