@@ -24,7 +24,7 @@ def load_stock_prices(cursor,df,conn=None):
 def _load_stock_prices_postgres(cursor, df):
     """
     we used to create the connection and cursor inside this function
-    but we moed it out to pipeline.py for maintainability purposes
+    but we moved it out to pipeline.py for maintainability purposes
     in case of rollback and error handling across multiple steps
     of the pipeline.
     We want to be able to rollback the entire transaction
