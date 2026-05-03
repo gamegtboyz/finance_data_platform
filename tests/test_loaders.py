@@ -2,8 +2,8 @@ import pytest
 import pandas as pd
 from datetime import date
 
-from src.load.fact_loader import load_stock_prices, get_max_loaded_date
-from src.load.dimension_loader import load_dim_dates, load_dim_metadata
+from load.fact_loader import load_stock_prices, get_max_loaded_date
+from load.dimension_loader import load_dim_dates, load_dim_metadata
 
 # define the helper functions for further testing as show below
 def _dim_date_row(date_str):
@@ -23,10 +23,10 @@ def _price_row(symbol, date_str, opening=148.0, closing=150.0):
     return {
         "symbol": symbol,
         "date": dt,
-        "open": opening,
+        "open_price": opening,
         "high": closing + 1,
         "low":  opening - 1,
-        "close": closing,
+        "close_price": closing,
         "volume": 25000000,
         "day": dt.day,
         "month": dt.month,
@@ -142,14 +142,14 @@ class TestLoadStockPrices:
         db_cursor.execute("SELECT COUNT(*) FROM stock_prices;")
         assert db_cursor.fetchone()[0] == 1
 
-    def test_currect_values_are_sorted(self, db_cursor):
+    def test_current_values_are_sorted(self, db_cursor):
         """
         Given the blank stock_prices table,
         the OHLCV stored should exactly match what was loaded
         """
         self._seed(db_cursor, dates=("2026-03-09",))
         load_stock_prices(db_cursor, pd.DataFrame([_price_row("AAPL", "2026-03-09", opening=148.0, closing=150.0)]))
-        db_cursor.execute("SELECT open, high, low, close, volume FROM stock_prices WHERE symbol = 'AAPL';")
+        db_cursor.execute("SELECT open_price, high, low, close_price, volume FROM stock_prices WHERE symbol = 'AAPL';")
         assert db_cursor.fetchone() == (148.0, 151.0, 147.0, 150.0, 25000000)
 
     def test_get_max_loaded_date(self, db_cursor):

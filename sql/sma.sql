@@ -1,13 +1,13 @@
 SELECT
     s.symbol,
     s.date,
-    s.close,
-    AVG(s.close) OVER (
+    s.close_price,
+    AVG(s.close_price) OVER (
         PARTITION BY s.symbol
         ORDER BY s.date ASC
         ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
     ) AS sma5,
-    AVG(s.close) OVER (
+    AVG(s.close_price) OVER (
         PARTITION BY s.symbol
         ORDER BY s.date ASC
         ROWS BETWEEN 19 PRECEDING AND CURRENT ROW

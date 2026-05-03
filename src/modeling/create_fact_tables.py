@@ -10,13 +10,13 @@ def create_fact_table():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS stock_prices (
-            symbol TEXT,
-            date DATE,
-            open NUMERIC,
-            high NUMERIC,
-            low NUMERIC,
-            close NUMERIC,
-            volume BIGINT,
+            symbol      TEXT,
+            date        DATE,
+            open_price  NUMERIC,
+            high        NUMERIC,
+            low         NUMERIC,
+            close_price NUMERIC,
+            volume      BIGINT,
             PRIMARY KEY (symbol, date),
             FOREIGN KEY (symbol) REFERENCES dim_metadata(symbol),
             FOREIGN KEY (date) REFERENCES dim_date(date)
