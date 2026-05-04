@@ -1,6 +1,6 @@
 .env
 learning_roadmap.md
-*/__pycache__*
+*__pycache__*
 data/raw/*/*.json
 results.txt
 *memo.md

@@ -59,7 +59,7 @@ x-airflow-common:
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
@@ -72,11 +72,33 @@ x-airflow-common:
     # The following line can be used to set a custom config file, stored in the local config folder
     # If you want to use it, outcomment it and replace airflow.cfg with the name of your config file
     # AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
+    
+    # add python path to make sure custom modules are visible in the container
+    PYTHONPATH: /opt/airflow:/opt/airflow/src
+
+    # add .env variables to the environment
+    DB_ENGINE: ${DB_ENGINE:-}
+    
+    AWS_REGION: ${AWS_REGION:-}
+    AWS_ACCESS_KEY: ${AWS_ACCESS_KEY:-}
+    AWS_SECRET_KEY: ${AWS_SECRET_KEY:-}
+    S3_BUCKET_NAME: ${S3_BUCKET_NAME:-}
+
+    REDSHIFT_HOST: ${REDSHIFT_HOST:-}
+    REDSHIFT_PORT: ${REDSHIFT_PORT:-}
+    REDSHIFT_NAME: ${REDSHIFT_NAME:-}
+    REDSHIFT_USER: ${REDSHIFT_USER:-}
+    REDSHIFT_PASSWORD: ${REDSHIFT_PASSWORD:-}
+    REDSHIFT_IAM_ROLE: ${REDSHIFT_IAM_ROLE:-}
+
+    ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-}
+
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - ../src:/opt/airflow/src
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
