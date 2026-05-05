@@ -1,0 +1,37 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: public    # the schema that pipeline will write into
+    description: "Raw tables loaded by the Airflow pipeline from S3 via Redshift COPY command"
+    tables:
+      - name: stock_prices
+        description: "Daily OHLCV stock prices"
+        columns:
+          - name: symbol
+            description: "Ticker symbol"
+          - name: date
+            description: "Trading date"
+          - name: open_price
+          - name: high
+          - name: low
+          - name: close_price
+          - name: volume
+
+      - name: dim_metadata
+        description: "Company dimension: name and sector"
+        columns:
+          - name: symbol
+          - name: company_name
+          - name: sector
+
+      - name: dim_date
+        description: "Date dimension"
+        columns:
+          - name: date
+          - name: day
+          - name: month
+          - name: year
+          - name: quarter
+          - name: day_of_week
+          - name: week_of_year
