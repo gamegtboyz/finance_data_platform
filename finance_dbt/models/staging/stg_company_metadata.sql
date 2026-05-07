@@ -3,6 +3,6 @@
 SELECT
     symbol,
     company_name,
-    sector,
+    INITCAP(LOWER(sector)) AS sector,
     GETDATE() as loaded_at
 FROM {{ source('raw', 'dim_metadata') }}

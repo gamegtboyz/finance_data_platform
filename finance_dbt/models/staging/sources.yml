@@ -13,25 +13,40 @@ sources:
           - name: date
             description: "Trading date"
           - name: open_price
+            description: "Opening price for the trading day/period"
           - name: high
+            description: "Highest price for the trading day/period"
           - name: low
+            description: "Lowest price for the trading day/period"
           - name: close_price
+            description: "Closing price for the trading day/period"
           - name: volume
+            description: "# of shares traded for the day/period"
 
       - name: dim_metadata
         description: "Company dimension: name and sector"
         columns:
           - name: symbol
+            description: "Ticker symbol - primary key"
           - name: company_name
+            description: "Legal entity name of the company"
           - name: sector
+            description: "GICS sector classification"
 
       - name: dim_date
         description: "Date dimension"
         columns:
           - name: date
+            description: "Calendar date - primary key"
           - name: day
+            description: "Day of the month (1-31)"
           - name: month
+            description: "Month of the year (1-12)"
           - name: year
+            description: "Year"
           - name: quarter
+            description: "Quarter of the year (1-4)"
           - name: day_of_week
+            description: "Day of the week (0=Monday, 6=Sunday)"
           - name: week_of_year
+            description: "ISO week number of the year (1-53)"

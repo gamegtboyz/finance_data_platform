@@ -21,7 +21,11 @@ SELECT
         (sp.close_price / LAG(sp.close_price) OVER (PARTITION BY sp.symbol ORDER BY sp.date)) - 1, 6
     ) AS daily_return,
     -- first close for cumulative return base
-    FIRST_VALUE(sp.close_price) OVER (PARTITION BY sp.symbol ORDER BY sp.date) AS first_close
+    FIRST_VALUE(sp.close_price) OVER (
+        PARTITION BY sp.symbol 
+        ORDER BY sp.date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS first_close
 FROM {{ ref('stg_stock_prices')}} sp
 LEFT JOIN {{ ref('stg_company_metadata') }} m ON sp.symbol = m.symbol
 LEFT JOIN {{ source('raw', 'dim_date') }} d on sp.date = d.date

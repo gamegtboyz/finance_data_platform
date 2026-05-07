@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: int_stock_prices_enriched
+    description: >
+      Joins staging stock prices with company metadata and date dimension.
+      Derives daily_return (simple return, not log) and first_close as the
+      cumulative return base. Materialized as a table for downstream mart performance.
+    columns:
+      - name: symbol
+        description: "Ticker symbol"
+        tests:
+          - not_null
+      - name: date
+        description: "Trading date"
+        tests:
+          - not_null
+      - name: company_name
+        description: "Company name joined from stg_company_metadata"
+        tests:
+          - not_null
+      - name: sector
+        description: "Sector joined from stg_company_metadata"
+        tests:
+          - not_null
+      - name: close_price
+        description: "Closing price for the trading day/period"
+        tests:
+          - not_null
+      - name: daily_return
+        description: "Simple daily return (close / prev_close) - 1. MULL for the first row per symbol."
+      - name: first_close
+        description: "First closing price for the symbol across all dates, used as cumulative return denominator."
+        tests:
+          - not_null
