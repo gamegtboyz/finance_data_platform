@@ -1,6 +1,7 @@
 [sqlfluff]
 templater = jinja
 dialect = redshift
+exclude_rules = CP01,LT12
 
 [sqlfluff:templater:jinja]
-load_macros_from_path = macros/sqlfluff_mocks.sql
+load_macros_from_path = sqlfluff_macros/sqlfluff_mocks.sql
