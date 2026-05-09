@@ -26,6 +26,6 @@ SELECT
         ORDER BY sp.date
         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
     ) AS first_close
-FROM {{ ref('stg_stock_prices')}} sp
-LEFT JOIN {{ ref('stg_company_metadata') }} m ON sp.symbol = m.symbol
-LEFT JOIN {{ source('raw', 'dim_date') }} d on sp.date = d.date
+FROM {{ ref('stg_stock_prices') }} AS sp
+LEFT JOIN {{ ref('stg_company_metadata') }} AS m ON sp.symbol = m.symbol
+LEFT JOIN {{ source('raw', 'dim_date') }} AS d ON sp.date = d.date
