@@ -9,4 +9,3 @@ airflow/logs/*
 !readme.md
 *.txt*
 !requirements.txt
-profiles.yml

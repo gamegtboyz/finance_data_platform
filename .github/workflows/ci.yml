@@ -34,6 +34,7 @@ jobs:
     dbt-compile:
         name: dbt compile
         runs-on: ubuntu-latest
+        environment: .env  # use environment secrets for dbt profiles
         steps:
             - uses: actions/checkout@v4     # checks out the repository
             
@@ -45,23 +46,6 @@ jobs:
             - name: Install dbt-redshift
               run: pip install dbt-redshift
 
-            - name: Generate profiles.yml
-              run: |
-                cat > profiles.yml << EOF
-                finance_dbt:
-                  target: prod
-                  outputs:
-                    prod:
-                      type: redshift
-                      host: "${REDSHIFT_HOST}"
-                      port: ${REDSHIFT_PORT:-5439}
-                      dbname: "${REDSHIFT_DB}"
-                      user: "${REDSHIFT_USER}"
-                      password: "${REDSHIFT_PASSWORD}"
-                      schema: analytics
-                      threads: 4
-                EOF
-
             - name: dbt parse (validates SQL syntax without actual Redshift connection)
               working-directory: finance_dbt
               run: dbt parse --profiles-dir .. --target prod
@@ -70,14 +54,8 @@ jobs:
     dbt-test-staging:
         name: dbt test (staging layer)
         runs-on: ubuntu-latest
+        environment: .env
         needs: dbt-compile          # only runs with compile succeeds
-        env:
-            DBT_PROFILES_DIR: .     # look for profiles.yml in repo root
-            REDSHIFT_HOST: ${{ secrets.REDSHIFT_HOST }}
-            REDSHIFT_PORT: ${{ secrets.REDSHIFT_PORT }}
-            REDSHIFT_DB: ${{ secrets.REDSHIFT_DB }}
-            REDSHIFT_USER: ${{ secrets.REDSHIFT_USER }}
-            REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
         steps:
             - uses: actions/checkout@v4
 
@@ -88,23 +66,6 @@ jobs:
 
             - name: Install dbt-redshift
               run: pip install dbt-redshift
-
-            - name: Generate profiles.yml   # this is required for both compile and test, but we generate it in each job to keep them self-contained. We could optimize by generating it once and caching it, but this is simpler and the overhead is minimal.
-              run: |
-                cat > profiles.yml << EOF
-                finance_dbt:
-                  target: prod
-                  outputs:
-                    prod:
-                      type: redshift
-                      host: "${REDSHIFT_HOST}"
-                      port: ${REDSHIFT_PORT:-5439}
-                      dbname: "${REDSHIFT_DB}"
-                      user: "${REDSHIFT_USER}"
-                      password: "${REDSHIFT_PASSWORD}"
-                      schema: analytics
-                      threads: 4
-                EOF
 
             - name: dbt test (staging models only)
               working-directory: finance_dbt

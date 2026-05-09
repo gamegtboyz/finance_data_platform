@@ -1,0 +1,22 @@
+finance_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: redshift
+      host: "{{ env_var('REDSHIFT_HOST') }}"
+      port: "{{ env_var('REDSHIFT_PORT') | int }}"
+      dbname: "{{ env_var('REDSHIFT_NAME') }}"
+      user: "{{ env_var('REDSHIFT_USER') }}"
+      password: "{{ env_var('REDSHIFT_PASSWORD') }}"
+      schema: dbt_dev
+      threads: 4
+    
+    prod:
+      type: redshift
+      host: "{{ env_var('REDSHIFT_HOST') }}"
+      port: "{{ env_var('REDSHIFT_PORT') | int }}"
+      dbname: "{{ env_var('REDSHIFT_NAME') }}"
+      user: "{{ env_var('REDSHIFT_USER') }}"
+      password: "{{ env_var('REDSHIFT_PASSWORD') }}"
+      schema: analytics
+      threads: 4
