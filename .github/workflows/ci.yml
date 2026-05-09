@@ -53,7 +53,7 @@ jobs:
               run: pip install dbt-redshift
 
             - name: dbt compile
-              working-directory: finance-dbt
+              working-directory: finance_dbt
               run: dbt compile --profiles-dir .. --target prod
 
     # -- Job 3: dbt test --select staging --
@@ -65,7 +65,7 @@ jobs:
             DBT_PROFILES_DIR: .     # look for profiles.yml in repo root
             REDSHIFT_HOST: ${{ secrets.REDSHIFT_HOST }}
             REDSHIFT_PORT: ${{ secrets.REDSHIFT_PORT }}
-            REDDSHIFT_DB: ${{ secrets.REDSHIFT_DB }}
+            REDSHIFT_DB: ${{ secrets.REDSHIFT_DB }}
             REDSHIFT_USER: ${{ secrets.REDSHIFT_USER }}
             REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
         steps:
