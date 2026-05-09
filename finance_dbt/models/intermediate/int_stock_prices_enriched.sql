@@ -22,7 +22,7 @@ SELECT
     ) AS daily_return,
     -- first close for cumulative return base
     FIRST_VALUE(sp.close_price) OVER (
-        PARTITION BY sp.symbol 
+        PARTITION BY sp.symbol
         ORDER BY sp.date
         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
     ) AS first_close
