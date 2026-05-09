@@ -35,6 +35,12 @@ jobs:
         name: dbt compile
         runs-on: ubuntu-latest
         environment: .env  # use environment secrets for dbt profiles
+        env:
+            REDSHIFT_HOST: ${{ secrets.REDSHIFT_HOST }}
+            REDSHIFT_PORT: ${{ secrets.REDSHIFT_PORT }}
+            REDSHIFT_NAME: ${{ secrets.REDSHIFT_NAME }}
+            REDSHIFT_USER: ${{ secrets.REDSHIFT_USER }}
+            REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
         steps:
             - uses: actions/checkout@v4     # checks out the repository
             
@@ -55,6 +61,12 @@ jobs:
         name: dbt test (staging layer)
         runs-on: ubuntu-latest
         environment: .env
+        env:
+            REDSHIFT_HOST: ${{ secrets.REDSHIFT_HOST }}
+            REDSHIFT_PORT: ${{ secrets.REDSHIFT_PORT }}
+            REDSHIFT_NAME: ${{ secrets.REDSHIFT_NAME }}
+            REDSHIFT_USER: ${{ secrets.REDSHIFT_USER }}
+            REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
         needs: dbt-compile          # only runs with compile succeeds
         steps:
             - uses: actions/checkout@v4
