@@ -100,7 +100,7 @@ jobs:
 
             - name: Lint SQL (dbt models)
               working-directory: finance_dbt
-              run: sqlfluff lint models/ --dialect redshift --templater dbt
+              run: sqlfluff lint models/ --dialect redshift --profiles-dir .. --templater dbt
 
     # -- Job 5: Airflow DAG intefrity --
     airflow-dag-integrity:
