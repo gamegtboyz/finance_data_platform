@@ -24,8 +24,7 @@ jobs:
             - name: Install dependencies
               run: |
                 pip install --upgrade pip
-                pip install -r requirements.txt
-                pip install pytest moto boto3
+                pip install pytest moto boto3 psycopg2-binary pandas boto3 redshift_connector python-dotenv alphavantage
 
             - name: Run unit tests (skip integration)
               run: pytest tests/ -m "not integration" -v
@@ -100,8 +99,8 @@ jobs:
 
             - name: Lint SQL (dbt models)
               working-directory: finance_dbt
-              run: sqlfluff lint models/ --dialect redshift --profiles-dir .. --templater dbt
-
+              run: sqlfluff lint models/ --dialect redshift
+              
     # -- Job 5: Airflow DAG intefrity --
     airflow-dag-integrity:
         name: Airflow DAG integrity (DagBag)
@@ -123,6 +122,9 @@ jobs:
                 pip install "apache-airflow==2.9.0" --constraint \
                 "https://raw.githubusercontent.com/apache/airflow/constraints-2.9.0/constraints-3.11.txt"
 
+            - name: Install pytest for testing
+              run: pip install pytest
+            
             - name: Initialize AIrflow DB (required for DagBag)
               run: airflow db init
 
