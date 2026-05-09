@@ -1,3 +1,6 @@
+[![CI](https://github.com/gamegtboyz/finance_data_platform/actions/workflows/ci.yml/badge.svg)](https://github.com/gamegtboyz/finance_data_platform/actions/workflows/ci.yml)
+[![dbt compile](https://github.com/gamegtboyz/finance_data_platform/actions/workflows/ci.yml/badge.svg?label=dbt-compile)](https://github.com/gamegtboyz/finance_data_platform/actions/workflows/ci.yml)
+
 # Financial Data Platform Project
 A production-style batch ETL pipeline for financial stock data, built with Python, PostgreSQL, and AWS (S3 + Redshift). Demonstrates professional data engineering practices: star schema design, cloud-native bulk loading via Redshift COPY, incremental loading, idempotent writes, structured logging, error handling, and a full integration test suite.
 
