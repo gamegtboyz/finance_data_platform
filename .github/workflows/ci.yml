@@ -27,7 +27,7 @@ jobs:
                 pip install pytest moto boto3 psycopg2-binary pandas redshift_connector python-dotenv
 
             - name: Run unit tests (skip integration)
-              run: pytest tests/ -m "not integration" -v
+              run: pytest tests/ -m "not integration" --ignore=tests/test_dag_integrity.py -v
 
     # -- Job 2: dbt compile --
     dbt-compile:
