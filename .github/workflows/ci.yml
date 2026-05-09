@@ -52,6 +52,23 @@ jobs:
             - name: Install dbt-redshift
               run: pip install dbt-redshift
 
+            - name: Generate profiles.yml
+              run: |
+                cat > profiles.yml << EOF
+                finance_dbt:
+                  target: prod
+                  outputs:
+                    prod:
+                      type: redshift
+                      host: "${REDSHIFT_HOST}"
+                      port: ${REDSHIFT_PORT}
+                      dbname: "${REDSHIFT_DB}"
+                      user: "${REDSHIFT_USER}"
+                      password: "${REDSHIFT_PASSWORD}"
+                      schema: analytics
+                      threads: 4
+                EOF
+
             - name: dbt compile
               working-directory: finance_dbt
               run: dbt compile --profiles-dir .. --target prod
@@ -78,6 +95,23 @@ jobs:
 
             - name: Install dbt-redshift
               run: pip install dbt-redshift
+
+            - name: Generate profiles.yml   # this is required for both compile and test, but we generate it in each job to keep them self-contained. We could optimize by generating it once and caching it, but this is simpler and the overhead is minimal.
+              run: |
+                cat > profiles.yml << EOF
+                finance_dbt:
+                  target: prod
+                  outputs:
+                    prod:
+                      type: redshift
+                      host: "${REDSHIFT_HOST}"
+                      port: ${REDSHIFT_PORT}
+                      dbname: "${REDSHIFT_DB}"
+                      user: "${REDSHIFT_USER}"
+                      password: "${REDSHIFT_PASSWORD}"
+                      schema: analytics
+                      threads: 4
+                EOF
 
             - name: dbt test (staging models only)
               working-directory: finance_dbt
