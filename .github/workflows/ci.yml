@@ -121,7 +121,7 @@ jobs:
               run: |
                 pip install "apache-airflow==2.9.0" --constraint \
                 "https://raw.githubusercontent.com/apache/airflow/constraints-2.9.0/constraints-3.11.txt"
-                pip install pytest psycopg2-binary dotenv
+                pip install pytest psycopg2-binary dotenv redshift_connector
             
             - name: Initialize AIrflow DB (required for DagBag)
               run: airflow db init
