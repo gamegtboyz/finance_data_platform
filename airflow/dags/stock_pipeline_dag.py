@@ -86,7 +86,7 @@ def notify_on_failure(context):
     # area to add SlackWebhookOperator or EmailOperator to send notification on failure
 
 def sla_miss_callback(dag, task_list, blocking_task_list, slas, blocking_tis):
-    """FIres when a task exceeds its SLA window. Useful for alerting on performance issues."""
+    """Fires when a task exceeds its SLA window. Useful for alerting on performance issues."""
     logger.warning(
         f"SLA MISSED on DAG '{dag.dag_id}'."
         f"MIssed tasks: {[str(t) for t in task_list]}"
