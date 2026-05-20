@@ -1,0 +1,62 @@
+# this file defines the schema for the staging models in the finance_dbt project. It includes descriptions and tests criteria of each column in the model.
+version: 2
+
+models:
+  - name: stg_stock_prices
+    description: "Thin staging view over raw stock_prices. Adds loaded at timestamp."
+    columns:
+      - name: symbol
+        description: "Ticker sumbol (e.g. AAPL, MSFT)"
+        tests:
+          - not_null
+      - name: date
+        description: "Trending date (YYYY-MM-DD)"
+        tests:
+          - not_null
+      - name: open_price
+        description: "Opening price for the trading day/period"
+        tests:
+          - not_null
+      - name: high
+        description: "Highest price for the trading day/period"
+        tests:
+          - not_null
+      - name: low
+        description: "Lowest price for the trading day/period"
+        tests:
+          - not_null
+      - name: close_price
+        description: "Closing price for the trading day/period"
+        tests:
+          - not_null
+      - name: volume
+        description: "Number of shares traded during the day/period"
+        tests:
+          - not_null
+      - name: loaded_at
+        description: "Timestamp when this record was staged (GETDATE())"
+        tests:
+          - not_null
+
+  - name: stg_company_metadata
+    description: "Thin staging view over dim_metadata. Adds loaded at timestamp."
+    columns:
+      - name: symbol
+        description: "Ticker symbol - primary key"
+        tests:
+          - not_null
+          - unique
+      - name: company_name
+        description: "Legal entity name of the company"
+        tests:
+          - not_null
+      - name: sector
+        description: "GICS sector classification"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Technology', 'Consumer Cyclical', 'Communication Services', 'Consumer Discretionary', 'Financials', 'Healthcare', 'Energy', 'Industrials', 'Materials', 'Real Estate', 'Utilities']
+      - name: loaded_at
+        description: "Timestamp when this record was staged"
+        tests:
+          - not_null

@@ -43,6 +43,10 @@ def transform_company_metadata(filepath):
     with open(filepath, "r") as f:
         data = json.load(f)
 
+    # detect AlphaVantage API quota/rate-limit error responses before any field access
+    if "Information" in data or "Note" in data:
+        raise ValueError("API quota/rate limit response detected in metadata file.")
+
     symbol = data.get("Symbol", "")
     if not symbol:
         raise ValueError(f"Metadata file is missing 'Symbol' field. The file may contain an API error response.")

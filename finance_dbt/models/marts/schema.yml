@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: mart_daily_stock_performance
+    description: >
+      business-facing mart: one row per sumbol per trading day.
+      Contains rolling SMAs, rolling volatility, cumulative return, and daily return.
+      Incremental model - new dates are appended only.
+    columns:
+      - name: symbol_date
+        description: "Surrogate key: symbol + '_' + date (e.g. AAPL_2026-03-07)"
+        tests:
+          - not_null
+          - unique
+      - name: symbol
+        description: "Ticker symbol"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_company_metadata')
+              field: symbol
+      - name: date
+        description: "Trading date"
+        tests:
+          - not_null
+      - name: company_name
+        description: "Company name"
+        tests:
+          - not_null
+      - name: sector
+        description: "Sector"
+        tests:
+          - not_null
+      - name: close_price
+        description: "Closing price for the trading day/period"
+        tests:
+          - not_null
+      - name: daily_return
+        description: "Simple return for the day. NULL on the first trading day per symbol."
+      - name: sma_5
+        description: "5-day simple moving average of close_price"
+      - name: sma_20
+        description: "20-day simple moving average of close_price"
+      - name: volatility_21
+        description: "21-day rolling volatility (stddev) of daily_return"
+      - name: cumulative_return
+        description: "Cumulative return since first available trading day: (close_price / first_close) - 1"
+
+  - name: mart_sector_volume_summary
+    description: >
+      Sector-fevel daily aggregation: total volume and average daily return per sector per date.
+    columns:
+      - name: sector
+        description: "GICS sector"
+        tests:
+          - not_null
+      - name: date 
+        description: "Trading date"
+        tests:
+          - not_null
+      - name: total_volume
+        description: "Sum of trading volume across all symbols in the sector"
+        tests:
+          - not_null
+      - name: avg_daily_return
+        description: "Average of daily returns across all symbols in the sector"

@@ -10,7 +10,7 @@ def db_connect():
     if  engine == "redshift":
         conn = redshift_connector.connect(
             host = os.getenv("REDSHIFT_HOST"),
-            port = os.getenv("REDSHIFT_PORT"),
+            port = int(os.getenv("REDSHIFT_PORT", 5439)),
             database = os.getenv("REDSHIFT_NAME"),
             user = os.getenv("REDSHIFT_USER"),
             password = os.getenv("REDSHIFT_PASSWORD")

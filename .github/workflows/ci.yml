@@ -1,0 +1,130 @@
+# This is the core CI pipeline. It consistes of main parts, name, on, and jobs.
+name: CI
+
+on:
+    # triggers the workflow on push and pull request to any branch in the repo
+    push:
+        branches: ["**"]
+    pull_request:
+        branches: ["**"]
+
+jobs:
+    # -- Job 1: pytest unit tests --
+    pytest:
+        name: pytest (unit tests)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4 # checks out the repository
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+
+            - name: Install dependencies
+              run: |
+                pip install --upgrade pip
+                pip install pytest moto boto3 psycopg2-binary pandas redshift_connector python-dotenv
+
+            - name: Run unit tests (skip integration)
+              run: pytest tests/ -m "not integration" --ignore=tests/test_dag_integrity.py -v
+
+    # -- Job 2: dbt compile --
+    dbt-compile:
+        name: dbt compile
+        runs-on: ubuntu-latest
+        environment: .env  # use environment secrets for dbt profiles
+        env:
+            REDSHIFT_HOST: ${{ secrets.REDSHIFT_HOST }}
+            REDSHIFT_PORT: ${{ secrets.REDSHIFT_PORT }}
+            REDSHIFT_NAME: ${{ secrets.REDSHIFT_NAME }}
+            REDSHIFT_USER: ${{ secrets.REDSHIFT_USER }}
+            REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
+        steps:
+            - uses: actions/checkout@v4     # checks out the repository
+            
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+
+            - name: Install dbt-redshift
+              run: pip install dbt-redshift
+
+            - name: dbt parse (validates SQL syntax without actual Redshift connection)
+              working-directory: finance_dbt
+              run: dbt parse --profiles-dir .. --target prod
+
+    # -- Job 3: dbt test --select staging --
+    dbt-test-staging:
+        name: dbt test (staging layer)
+        runs-on: ubuntu-latest
+        environment: .env
+        env:
+            REDSHIFT_HOST: ${{ secrets.REDSHIFT_HOST }}
+            REDSHIFT_PORT: ${{ secrets.REDSHIFT_PORT }}
+            REDSHIFT_NAME: ${{ secrets.REDSHIFT_NAME }}
+            REDSHIFT_USER: ${{ secrets.REDSHIFT_USER }}
+            REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
+        needs: dbt-compile          # only runs with compile succeeds
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+
+            - name: Install dbt-redshift
+              run: pip install dbt-redshift
+
+            - name: dbt test (staging models only)
+              working-directory: finance_dbt
+              run: dbt test --select staging --profiles-dir .. --target prod
+
+    # -- Job 4: sqlfluff lint --
+    sqlfluff:
+        name: sqlfluff lint
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+
+            - name: Install sqlfluff
+              run: pip install sqlfluff sqlfluff-templater-dbt
+
+            - name: Lint SQL (dbt models)
+              working-directory: finance_dbt
+              run: sqlfluff lint models/ --dialect redshift
+              
+    # -- Job 5: Airflow DAG intefrity --
+    airflow-dag-integrity:
+        name: Airflow DAG integrity (DagBag)
+        runs-on: ubuntu-latest
+        env:
+            AIRFLOW_HOME: /tmp/airflow
+            AIRFLOW__CORE__LOAD_EXAMPLES: "False"   # don't load example DAGs
+            AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "sqlite:////tmp/airflow/airflow.db"  # use SQLite for testing
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+
+            - name: Install Airflow
+              run: |
+                pip install "apache-airflow==2.9.0" --constraint \
+                "https://raw.githubusercontent.com/apache/airflow/constraints-2.9.0/constraints-3.11.txt"
+                pip install pytest psycopg2-binary dotenv redshift_connector
+            
+            - name: Initialize AIrflow DB (required for DagBag)
+              run: airflow db init
+
+            - name: Run DAG integrity tests
+              run: pytest tests/test_dag_integrity.py -v

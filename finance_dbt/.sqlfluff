@@ -1,0 +1,8 @@
+[sqlfluff]
+templater = jinja
+dialect = redshift
+max_line_length = 120
+exclude_rules = CP01,LT12,ST06,LT02,RF02
+
+[sqlfluff:templater:jinja]
+load_macros_from_path = sqlfluff_macros/sqlfluff_mocks.sql
