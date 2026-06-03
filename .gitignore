@@ -9,4 +9,5 @@ airflow/logs/*
 !readme.md
 *.txt*
 !requirements.txt
-*.pyc*
+*.pyc
+*.user.yml

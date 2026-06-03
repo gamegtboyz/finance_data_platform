@@ -14,7 +14,7 @@ API_KEY = os.getenv('ALPHAVANTAGE_API_KEY')
 
 logger = logging.getLogger(__name__)
 
-RAW_DATA_DIR = pathlib.Path(__file__).parent.parent.parent / "data" / "raw"
+RAW_DATA_DIR = pathlib.Path(os.getenv("RAW_DATA_DIR", str(pathlib.Path(__file__).parent.parent.parent / "data" / "raw")))
 
 def fetch_stock_prices(symbol):
     url = "https://www.alphavantage.co/query"

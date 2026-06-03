@@ -1,4 +1,7 @@
 import logging
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from db_connect import db_connect
 
 logger = logging.getLogger(__name__)

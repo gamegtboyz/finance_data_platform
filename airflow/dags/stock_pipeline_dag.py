@@ -3,6 +3,7 @@ import logging
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,8 @@ def load_task(**context):
 
 def notify_on_failure(context):
     """Called when any task fails. Wire to Slack or email in production."""
+    from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
+
     task_instance = context["task_instance"]
     logger.error(
         f"Task FAILED: DAG={task_instance.dag_id}, "
@@ -83,16 +86,40 @@ def notify_on_failure(context):
         f"Run={context['run_id']}"
     )
 
-    # area to add SlackWebhookOperator or EmailOperator to send notification on failure
+    # area to add SlackWebhookOperator to send notification on failure
+    slack_notify_failure = SlackWebhookOperator(
+        task_id="slack_notify_failure",
+        slack_webhook_conn_id = "slack_default",
+        message=(
+            f":red_circle: Task failed\n"
+            f"*DAG*: {task_instance.dag_id}\n"
+            f"*Task*: {task_instance.task_id}\n"
+            f"*Run*: {context['run_id']}"
+        )
+    )
+
+    slack_notify_failure.execute(context=context)
+
 
 def sla_miss_callback(dag, task_list, blocking_task_list, slas, blocking_tis):
     """Fires when a task exceeds its SLA window. Useful for alerting on performance issues."""
-    logger.warning(
-        f"SLA MISSED on DAG '{dag.dag_id}'."
-        f"MIssed tasks: {[str(t) for t in task_list]}"
+    from airflow.operators.email import EmailOperator
+
+    missed = [str(t) for t in task_list]
+    logger.warning(f"SLA MISSED on DAG '{dag.dag_id}'. Missed tasks: {missed}")
+
+    # area to add EmailOperator to send notification on SLA miss
+    email_notify_sla_miss = EmailOperator(
+        task_id="email_sla_miss",
+        to="gamegame.gtboyz@gmail.com",
+        subject=f"SLA Missed: {dag.dag_id}",
+        html_content=(
+            f"<b>SLA missed</b> on DAG <code>{dag.dag_id}</code>.<br>"
+            f"Missed tasks: {missed}"
+        )
     )
 
-    # area to add SlackWebhookOperator or EmailOperator to send notification on SLA miss
+    email_notify_sla_miss.execute(context={})
 
 default_args = {
     "owner": "airflow",
@@ -130,5 +157,15 @@ with DAG(
         sla=timedelta(hours=2)   # set SLA of 2 hours for load task
     )
 
+    dbt_run = BashOperator(
+        task_id="dbt_run",
+        bash_command="/opt/dbt-env/bin/dbt run --project-dir /opt/finance_dbt --profiles-dir /opt/finance_dbt"
+    )
+
+    dbt_test = BashOperator(
+        task_id="dbt_test",
+        bash_command="/opt/dbt-env/bin/dbt test --project-dir /opt/finance_dbt"
+    )
+
     # define task dependencies
-    extract >> transform >> load
+    extract >> transform >> load >> dbt_run >> dbt_test
