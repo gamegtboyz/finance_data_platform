@@ -164,7 +164,7 @@ with DAG(
 
     dbt_test = BashOperator(
         task_id="dbt_test",
-        bash_command="/opt/dbt-env/bin/dbt test --project-dir /opt/finance_dbt"
+        bash_command="/opt/dbt-env/bin/dbt test --project-dir /opt/finance_dbt --profiles-dir /opt/finance_dbt"
     )
 
     # define task dependencies
