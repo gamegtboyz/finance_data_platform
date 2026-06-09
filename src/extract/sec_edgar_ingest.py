@@ -33,7 +33,7 @@ def fetch_company_facts(symbol: str):
     time.sleep(0.15)
 
     url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
-    response = requests.get(url, headers=EDGAR_HEADERS, timeout=30)
+    response = requests.get(url, headers=EDGAR_HEADERS, timeout=60)
     response.raise_for_status()
     data = response.json()
 
