@@ -25,3 +25,6 @@ moto[s3]
 # data build tool
 dbt-redshift
 sqlfluff
+
+# sec edgar api
+sec-edgar-api
