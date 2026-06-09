@@ -16,6 +16,14 @@ EDGAR_HEADERS = {"User-Agent": os.getenv("EDGAR_USER_AGENT")}
 
 RAW_DATA_DIR = pathlib.Path(os.getenv("RAW_DATA_DIR", str(pathlib.Path(__file__).parent.parent.parent / "data" / "raw")))
 
+METRICS = [
+    "Revenues",
+    "NetIncomeLoss",
+    "EarningsPerShareDiluted",
+    "LongTermDebt",
+    "Assets"
+]
+
 def _get_cik(symbol: str) -> str:
     """Get CIK (Central Index Key) for a given stock symbol."""
     url = "https://www.sec.gov/files/company_tickers.json"
