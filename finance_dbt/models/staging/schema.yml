@@ -55,7 +55,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['Technology', 'Consumer Cyclical', 'Communication Services', 'Consumer Discretionary', 'Financials', 'Healthcare', 'Energy', 'Industrials', 'Materials', 'Real Estate', 'Utilities']
+              arguments:
+                values: ['Technology', 'Consumer Cyclical', 'Communication Services', 'Consumer Discretionary', 'Financials', 'Healthcare', 'Energy', 'Industrials', 'Materials', 'Real Estate', 'Utilities']
       - name: loaded_at
         description: "Timestamp when this record was staged"
         tests:

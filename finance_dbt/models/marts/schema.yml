@@ -17,8 +17,9 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('stg_company_metadata')
-              field: symbol
+              arguments:
+                to: ref('stg_company_metadata')
+                field: symbol
       - name: date
         description: "Trading date"
         tests:
