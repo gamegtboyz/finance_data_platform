@@ -65,3 +65,38 @@ models:
           - not_null
       - name: avg_daily_return
         description: "Average of daily returns across all symbols in the sector"
+
+  - name: mart_fundamental_metrics
+    description: >
+      Fundamental metrics for each symbol, updated in quarterly basis.
+    columns:
+      - name: symbol
+        description: "Ticker symbol"
+        tests:
+          - not_null
+      - name: period_end_date
+        description: "End date of the financial period"
+        tests:
+          - not_null
+      - name: form_type
+        description: "Type of SEC filing (e.g. 10-K, 10-Q)"
+      - name: revenue
+        description: "Total revenue for the period"
+      - name: net_income
+        description: "Net income for the period"
+      - name: eps_diluted
+        description: "Earnings per share (diluted) for the period"
+      - name: long_term_debt
+        description: "Long-term debt at the end of the period"
+      - name: total_assets
+        description: "Total assets at the end of the period"
+      - name: company_name
+        description: "Company legal entity name"
+      - name: sector
+        description: "GICS sector"
+      - name: revenue_yoy_growth
+        description: "Year-over-year revenue growth"
+      - name: debt_to_equity
+        description: "Debt-to-equity ratio"
+      - name: debt_to_assets
+        description: "Debt-to-assets ratio"
