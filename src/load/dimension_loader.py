@@ -32,7 +32,7 @@ def _load_dim_dates_redshift(cursor, df):
             INSERT INTO dim_date ({", ".join(date_cols)}) VALUES ({placeholders});
             """, row)
 
-    logger.info(f"loaded {len(values)} rows into dim_date on Redshift db")
+    logger.info(f"loaded {len(values)} rows into dim_date on Redshift Serverless")
 
 def _load_dim_dates_postgres(cursor, df):
     """
@@ -51,7 +51,7 @@ def _load_dim_dates_postgres(cursor, df):
     """
 
     execute_values(cursor, insert_query,values)
-    logger.info(f"Loaded {len(values)} rows into dim_date")
+    logger.info(f"Loaded {len(values)} rows into dim_date on local PostgreSQL")
 
 def load_dim_metadata(cursor, metadata):
     engine = os.getenv("DB_ENGINE", "postgres")
@@ -72,7 +72,7 @@ def _load_dim_metadata_redshift(cursor, metadata):
         """, (metadata["symbol"], metadata["company_name"], metadata["sector"])
     )
 
-    logger.info(f"loaded metadata for {metadata['symbol']} into dim_metadata on Redshift db")
+    logger.info(f"loaded metadata for {metadata['symbol']} into dim_metadata on Redshift Serverless")
 
 def _load_dim_metadata_postgres(cursor, metadata):
     cursor.execute(
@@ -83,4 +83,4 @@ def _load_dim_metadata_postgres(cursor, metadata):
         """,
         (metadata["symbol"], metadata["company_name"], metadata["sector"])
     )
-    logger.info(f"Loaded metadata for {metadata['symbol']} into dim_metadata")
+    logger.info(f"Loaded metadata for {metadata['symbol']} into dim_metadata on local PostgreSQL")

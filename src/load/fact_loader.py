@@ -47,7 +47,7 @@ def _load_stock_prices_postgres(cursor, df):
     """
 
     execute_values(cursor, insert_query, values)
-    logger.info(f"Loaded {len(values)} new rows into stock_prices")
+    logger.info(f"Loaded {len(values)} new rows into stock_prices on local PostgreSQL")
 
 def _load_stock_prices_redshift(cursor, df):
     """
@@ -99,7 +99,7 @@ def _load_stock_prices_redshift(cursor, df):
         """
     )
 
-    logger.info(f"Loaded {len(df_copy)} rows into stock_prices via Redshift COPY")
+    logger.info(f"Loaded {len(df_copy)} rows into stock_prices on Redshift Serverless")
 
 def get_max_loaded_date(cursor, symbol):
     """
