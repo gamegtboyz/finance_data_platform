@@ -61,3 +61,23 @@ models:
         description: "Timestamp when this record was staged"
         tests:
           - not_null
+
+  - name: stg_fundamentals
+    description: "Thin staging view over fundamentals. Adds loaded at timestamp"
+    columns:
+      - name: symbol
+        description: "Ticker symbol"
+        tests:
+          - not_null
+      - name: period_end_date
+        description: "Ending date of the reporting period (YYYY-MM-DD)"
+        tests:
+          - not_null
+      - name: metric
+        description: "Financial metric name (e.g. total_revenue, net_income)"
+        tests:
+          - not_null
+      - name: loaded_at
+        description: "Timestamp when this record was staged"
+        tests:
+          - not_null

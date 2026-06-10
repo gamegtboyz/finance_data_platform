@@ -50,3 +50,21 @@ sources:
             description: "Day of the week (0=Monday, 6=Sunday)"
           - name: week_of_year
             description: "ISO week number of the year (1-53)"
+
+      - name: fundamentals
+        description: "Company fundamentals data"
+        columns:
+          - name: symbol
+            description: "Ticker symbol - foreign key to dim_metadata"
+          - name: period_end_date
+            description: "End date of the reporting period (YYYY-MM-DD)"
+          - name: form_type
+            description: "Type of SEC filing (e.g. 10-K, 10-Q)"
+          - name: metric
+            description: "Financial metrics"
+          - name: value
+            description: "Financial metric value"
+          - name: unit
+            description: "Financial metric units"
+          - name: filed_date
+            description: "Date that the report was filed into SEC database (YYYY-MM-DD)"
