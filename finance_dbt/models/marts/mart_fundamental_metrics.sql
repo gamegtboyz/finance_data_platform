@@ -5,11 +5,11 @@ WITH pivoted AS (
         symbol,
         period_end_date,
         form_type,
-        MAX(CASE WHEN metric = "revenue" THEN value END) AS revenue,
-        MAX(CASE WHEN metric = "net_income" THEN value END ) AS net_income,
-        MAX(CASE WHEN metric = "eps_diluted" THEN value END) AS eps_diluted,
-        MAX(CASE WHEN metric = "long_term_debt" THEN value END) AS long_term_debt,
-        MAX(CASE WHEN metric = "total_assets" THEN value END) AS total_assets
+        MAX(CASE WHEN metric = 'revenue' THEN value END) AS revenue,
+        MAX(CASE WHEN metric = 'net_income' THEN value END ) AS net_income,
+        MAX(CASE WHEN metric = 'eps_diluted' THEN value END) AS eps_diluted,
+        MAX(CASE WHEN metric = 'long_term_debt' THEN value END) AS long_term_debt,
+        MAX(CASE WHEN metric = 'total_assets' THEN value END) AS total_assets
     FROM {{ ref('stg_fundamentals') }}
     GROUP BY symbol, period_end_date, form_type
 ),
@@ -22,13 +22,9 @@ with_ratios AS (
         -- Revenue YoY growth (annual filings only)
         ROUND(
             revenue / NULLIF(
-                LAG(revenue) OVER (PARTITION BY symbol ORDER BY period_end_date), 0
+                LAG(revenue) OVER (PARTITION BY symbol, form_type ORDER BY period_end_date), 0
             ) - 1, 4
         ) AS revenue_yoy_growth,
-        -- D/E ratio
-        ROUND(
-            long_term_debt / NULLIF(total_assets - long_term_debt, 0), 4
-        ) AS debt_to_equity,
         -- D/A ratio
         ROUND(
             long_term_debt / NULLIF(total_assets, 0), 4

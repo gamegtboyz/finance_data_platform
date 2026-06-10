@@ -75,6 +75,30 @@ def load_task(**context):
         cursor.close()
         conn.close()
 
+# SEC edgar ETL pipeline
+def edgar_task(**context):
+    from src.db_connect import db_connect
+    from src.extract.sec_edgar_ingest import fetch_company_facts
+    from src.transform.transform_edgar import transform_company_facts
+    from src.load.edgar_loader import load_fundamentals
+
+    conn = db_connect()
+    cursor = conn.cursor()
+
+    try:
+        for symbol in symbols:
+            filepath = fetch_company_facts(symbol)
+            df = transform_company_facts(filepath, symbol)
+            if not df.empty:
+                load_fundamentals(cursor, df)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()
+
 def notify_on_failure(context):
     """Called when any task fails. Wire to Slack or email in production."""
     from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
@@ -157,15 +181,24 @@ with DAG(
         sla=timedelta(hours=2)   # set SLA of 2 hours for load task
     )
 
+    edgar_etl = PythonOperator(
+        task_id = "edgar_etl",
+        python_callable = edgar_task,
+        sla = timedelta(hours=1)
+    )
+
     dbt_run = BashOperator(
         task_id="dbt_run",
-        bash_command="/opt/dbt-env/bin/dbt run --project-dir /opt/finance_dbt --profiles-dir /opt/finance_dbt"
+        bash_command="/opt/dbt-env/bin/dbt run --project-dir /opt/finance_dbt --profiles-dir /opt/finance_dbt",
+        sla=timedelta(hours=2)
     )
 
     dbt_test = BashOperator(
         task_id="dbt_test",
-        bash_command="/opt/dbt-env/bin/dbt test --project-dir /opt/finance_dbt --profiles-dir /opt/finance_dbt"
+        bash_command="/opt/dbt-env/bin/dbt test --project-dir /opt/finance_dbt --profiles-dir /opt/finance_dbt",
+        sla=timedelta(hours=2)
     )
 
     # define task dependencies
-    extract >> transform >> load >> dbt_run >> dbt_test
+    extract >> transform >> load
+    [load, edgar_etl] >> dbt_run >> dbt_test

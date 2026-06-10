@@ -9,9 +9,9 @@ logger = logging.getLogger(__name__)
 def load_fundamentals(cursor, df, conn=None):
     engine = os.getenv("DB_ENGINE", "postgres")
     if engine == "redshift":
-        _load_fundamentals_redshift(cursor, df, conn)
+        _load_fundamentals_redshift(cursor, df)
     elif engine == "postgres":
-        _load_fundamentals_postgres(cursor, df, conn)
+        _load_fundamentals_postgres(cursor, df)
 
 def _load_fundamentals_postgres(cursor, df):
     cols = ["symbol", "period_end_date", "form_type", "metric", "value", "unit", "filed_date"]

@@ -96,7 +96,5 @@ models:
         description: "GICS sector"
       - name: revenue_yoy_growth
         description: "Year-over-year revenue growth"
-      - name: debt_to_equity
-        description: "Debt-to-equity ratio"
       - name: debt_to_assets
         description: "Debt-to-assets ratio"
