@@ -46,7 +46,7 @@ def fetch_company_facts(symbol: str):
     data = response.json()
 
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    filepath = RAW_DATA_DIR / symbol / f"{symbol}_companyfacts_{timestamp}.json"
+    filepath = RAW_DATA_DIR / symbol / f"{symbol}_fundamentals_{timestamp}.json"
     filepath.parent.mkdir(parents=True, exist_ok=True)
 
     with open(filepath, "w") as f:

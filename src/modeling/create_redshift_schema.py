@@ -59,6 +59,21 @@ CREATE TABLE IF NOT EXISTS dim_metadata (
 DISTSTYLE ALL;
 """
 
+CREATE_FUNDAMENTALS = """
+CREATE TABLE IF NOT EXISTS fundamentals (
+    symbol          VARCHAR(10)     NOT NULL    ENCODE lzo,
+    period_end_date DATE            NOT NULL    ENCODE az64,
+    form_type       VARCHAR(10)                 ENCODE lzo,
+    metric          VARCHAR(50)     NOT NULL    ENCODE lzo,
+    value           NUMERIC(20, 4)              ENCODE az64,
+    unit            VARCHAR(20)                 ENCODE lzo,
+    filed_date      DATE                        ENCODE az64,
+    PRIMARY KEY (symbol, period_end_date, metric)
+)
+DISTKEY (symbol)
+SORTKEY (period_end_date);
+"""
+
 # create staging table as required by redshift on both fact and dimension tables
 CREATE_STAGING_STOCK_PRICES = """
 CREATE TABLE IF NOT EXISTS staging_stock_prices (
@@ -95,6 +110,19 @@ CREATE TABLE IF NOT EXISTS staging_dim_metadata (
 DISTSTYLE EVEN;
 """
 
+CREATE_STAGING_FUNDAMENTALS = """
+CREATE TABLE IF NOT EXISTS staging_fundamentals (
+    symbol          VARCHAR(10)     NOT NULL    ENCODE lzo,
+    period_end_date DATE            NOT NULL    ENCODE az64,
+    form_type       VARCHAR(10)                 ENCODE lzo,
+    metric          VARCHAR(50)     NOT NULL    ENCODE lzo,
+    value           NUMERIC(20, 4)              ENCODE az64,
+    unit            VARCHAR(20)                 ENCODE lzo,
+    filed_date      DATE                        ENCODE az64
+    )
+DISTSTYLE EVEN;
+"""
+
 def create_redshift_schema():
     conn = db_connect()
     cursor = conn.cursor()
@@ -109,11 +137,15 @@ def create_redshift_schema():
         logger.info("Creating dim_metadata table in Redshift...")
         cursor.execute(CREATE_DIM_METADATA)
 
+        logger.info("Creating fundamentals table in Redshift...")
+        cursor.execute(CREATE_FUNDAMENTALS)
+
         # create staging tables for Redshift COPY loading
         logger.info("Creating staging tables for Redshift COPY loading...")
         cursor.execute(CREATE_STAGING_STOCK_PRICES)
         cursor.execute(CREATE_STAGING_DIM_DATE)
         cursor.execute(CREATE_STAGING_DIM_METADATA)
+        cursor.execute(CREATE_STAGING_FUNDAMENTALS)
 
         conn.commit()
         logger.info("Redshift schema created successfully.")

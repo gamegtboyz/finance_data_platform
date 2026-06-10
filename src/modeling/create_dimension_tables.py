@@ -11,13 +11,13 @@ def create_dim_dates():
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS dim_date (
-            date DATE PRIMARY KEY,
-            day INT,
-            month INT,
-            year INT,
-            quarter INT,
-            day_of_week INT,
-            week_of_year INT
+            date            DATE PRIMARY KEY,
+            day             INT,
+            month           INT,
+            year            INT,
+            quarter         INT,
+            day_of_week     INT,
+            week_of_year    INT
         );
         """
     )
@@ -28,20 +28,41 @@ def create_dim_dates():
 
 def create_dim_metadata():
     conn = db_connect()
-
     cursor = conn.cursor()
-
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS dim_metadata (
-            symbol TEXT PRIMARY KEY,
-            company_name TEXT,
-            sector TEXT
+            symbol          TEXT PRIMARY KEY,
+            company_name    TEXT,
+            sector          TEXT
             );
         """       
     )
 
-    conn.commit()   # 
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+# define the new function for SEC edgar schema
+def create_fundamentals():
+    conn = db_connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS fundamentals (
+            symbol              VARCHAR(10) NOT NULL,
+            period_end_date     DATE        NOT NULL,
+            form_type           VARCHAR(10) NOT NULL,
+            metric              VARCHAR(50) NOT NULL,
+            value               NUMERIC(20,4),
+            unit                VARCHAR(20),
+            filed_date          DATE,
+            PRIMARY KEY (symbol, period_end_date, metric)
+        );
+        """
+    )
+
+    conn.commit()
     cursor.close()
     conn.close()
 
@@ -49,3 +70,4 @@ def create_dim_metadata():
 if __name__ == "__main__":
     create_dim_dates()
     create_dim_metadata()
+    create_fundamentals()
