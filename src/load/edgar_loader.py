@@ -34,8 +34,8 @@ def _load_fundamentals_redshift(cursor, df):
     cols = ["symbol", "period_end_date", "form_type", "metric", "value", "unit", "filed_date"]
     df_copy = df[cols].copy()
     # convert date to python date object to avoid psycopg2 errors
-    df_copy["period_end_date"] = df_copy["period_end_date"].dt.to_pydatetime()
-    df_copy["filed_date"] = df_copy["filed_date"].dt.to_pydatetime()
+    df_copy["period_end_date"] = df_copy["period_end_date"].dt.strftime("%Y-%m-%d")
+    df_copy["filed_date"] = df_copy["filed_date"].dt.strftime("%Y-%m-%d")
     # convert the DataFrame to a list of tuples for execute_values
     values = [tuple(row) for row in df_copy.values.tolist()]
 
@@ -48,7 +48,7 @@ def _load_fundamentals_redshift(cursor, df):
 
     insert_query = """
         INSERT INTO fundamentals (symbol, period_end_date, form_type, metric, value, unit, filed_date)
-        VALUES %s;
-        """
-    execute_values(cursor, insert_query, values)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """
+    cursor.executemany(insert_query, values) # Redshift does not support execute_values, so we use executemany instead which is less efficient but necessary for compatibility
     logger.info(f"Loaded {len(values)} rows into fundamentals on Redshift Serverless")

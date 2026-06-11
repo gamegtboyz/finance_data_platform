@@ -22,7 +22,7 @@ with_ratios AS (
         -- Revenue YoY growth (annual filings only)
         ROUND(
             revenue / NULLIF(
-                LAG(revenue) OVER (PARTITION BY symbol, form_type ORDER BY period_end_date), 0
+                LAG(revenue) OVER (PARTITION BY p.symbol, p.form_type ORDER BY p.period_end_date), 0
             ) - 1, 4
         ) AS revenue_yoy_growth,
         -- D/A ratio

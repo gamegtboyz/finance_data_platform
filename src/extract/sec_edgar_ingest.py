@@ -12,7 +12,13 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-EDGAR_HEADERS = {"User-Agent": os.getenv("EDGAR_USER_AGENT")}
+_edgar_user_agent = os.getenv("EDGAR_USER_AGENT")
+if not _edgar_user_agent:
+    raise EnvironmentError(
+        "EDGAR_USER_AGENT env var is not set. "
+        "SEC requires format: 'YourName your@email.com'"
+    )
+EDGAR_HEADERS = {"User-Agent": _edgar_user_agent}
 
 RAW_DATA_DIR = pathlib.Path(os.getenv("RAW_DATA_DIR", str(pathlib.Path(__file__).parent.parent.parent / "data" / "raw")))
 
