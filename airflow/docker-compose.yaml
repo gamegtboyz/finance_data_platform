@@ -106,6 +106,9 @@ x-airflow-common:
     AIRFLOW__SMTP__SMTP_SSL: ${AIRFLOW__SMTP__SMTP_SSL:-false}
     AIRFLOW__SMTP__SMTP_STARTTLS: ${AIRFLOW__SMTP__SMTP_STARTTLS:-true}    
 
+    EDGAR_USER_AGENT: ${EDGAR_USER_AGENT:-}
+    FRED_API_KEY: ${FRED_API_KEY:-}
+
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
