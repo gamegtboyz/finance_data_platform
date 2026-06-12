@@ -74,6 +74,16 @@ DISTKEY (symbol)
 SORTKEY (period_end_date);
 """
 
+CREATE_MACROS = """
+CREATE TABLE IF NOT EXISTS macros (
+    series_id VARCHAR(20) NOT NULL ENCODE lzo,
+    date DATE NOT NULL ENCODE az64,
+    value NUMERIC(12, 6) NOT NULL ENCODE az64
+)
+DISTSTYLE ALL
+SORTKEY (date);
+"""
+
 # create staging table as required by redshift on both fact and dimension tables
 CREATE_STAGING_STOCK_PRICES = """
 CREATE TABLE IF NOT EXISTS staging_stock_prices (
@@ -123,6 +133,15 @@ CREATE TABLE IF NOT EXISTS staging_fundamentals (
 DISTSTYLE EVEN;
 """
 
+CREATE_STAGING_MACROS = """
+CREATE TABLE IF NOT EXISTS staging_macros (
+    series_id   VARCHAR(20)     NOT NULL ENCODE lzo,
+    date        DATE            NOT NULL ENCODE az64,
+    value       NUMERIC(12, 6)  NOT NULL ENCODE az64
+)
+DISTSTYLE EVEN;
+"""
+
 def create_redshift_schema():
     conn = db_connect()
     cursor = conn.cursor()
@@ -140,13 +159,16 @@ def create_redshift_schema():
         logger.info("Creating fundamentals table in Redshift...")
         cursor.execute(CREATE_FUNDAMENTALS)
 
+        logger.info("Creating macros table in Redshift...")
+        cursor.execute(CREATE_MACROS)
+
         # create staging tables for Redshift COPY loading
         logger.info("Creating staging tables for Redshift COPY loading...")
         cursor.execute(CREATE_STAGING_STOCK_PRICES)
         cursor.execute(CREATE_STAGING_DIM_DATE)
         cursor.execute(CREATE_STAGING_DIM_METADATA)
         cursor.execute(CREATE_STAGING_FUNDAMENTALS)
-
+        cursor.execute(CREATE_STAGING_MACROS)
         conn.commit()
         logger.info("Redshift schema created successfully.")
     

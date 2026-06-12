@@ -66,8 +66,28 @@ def create_fundamentals():
     cursor.close()
     conn.close()
 
+# define the new function for FRED schema
+def create_macros():
+    conn = db_connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS macros (
+            series_id   VARCHAR(20)     NOT NULL,
+            date        DATE            NOT NULL,
+            value       NUMERIC(12, 6)  NOT NULL,
+            PRIMARY KEY (series_id, date)
+            );
+        """
+    )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
 # run the functions to create the dimension tables when this script is executed directly, not from the orchestration script (python entry point guard)
 if __name__ == "__main__":
     create_dim_dates()
     create_dim_metadata()
     create_fundamentals()
+    create_macros()
