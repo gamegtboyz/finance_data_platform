@@ -17,8 +17,8 @@ def transform_fred_series(filepath: str, series_id: str) -> pd.DataFrame:
             "value": float(obs["value"])
         })
 
-        df = pd.DataFrame(records)
-        if not df.empty:
-            df["date"] = pd.to_datetime(df["date"])
+    df = pd.DataFrame(records)
+    if not df.empty:
+        df["date"] = pd.to_datetime(df["date"])
         
-        return df
+    return df

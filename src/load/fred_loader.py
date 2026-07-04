@@ -25,7 +25,7 @@ def _load_macros_postgres(cursor, df):
     execute_values(cursor, """
         INSERT INTO macros (series_id, date, value)
         VALUES %s
-        ON CONFLICT (series_id, date) DO NOTHING)
+        ON CONFLICT (series_id, date) DO NOTHING
     """, values)
     logger.info(f"Loaded {len(values)} rows into macros table in Postgres.")
 
@@ -35,7 +35,7 @@ def _load_macros_redshift(cursor, df):
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%SZ")
     s3_key = f"staging/macros_{timestamp}.jsonl"
-    tmp = tempfile.NamedTemporaryFIle(mode="w", suffex=".jsonl", delete=False)
+    tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False)
     for _, row in df_copy.iterrows():
         tmp.write(json.dumps({"series_id": row["series_id"],
                               "date":  row["date"],
