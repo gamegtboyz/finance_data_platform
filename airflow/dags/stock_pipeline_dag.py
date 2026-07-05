@@ -4,12 +4,11 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
-from src.extract.fred_ingest import SERIES
 
 logger = logging.getLogger(__name__)
 
 symbols = ["NVDA","AAPL","MSFT","GOOGL","AMZN"]
-series_ids = SERIES
+series_ids = ["FEDFUNDS", "CPIAUCSL", "T10Y2Y", "UNRATE"]
 
 # extraction method
 def extract_task(**context):
@@ -125,7 +124,7 @@ def fred_task(**context):
     finally:
         cursor.close()
         conn.close()
-        
+
 
 def notify_on_failure(context):
     """Called when any task fails. Wire to Slack or email in production."""
