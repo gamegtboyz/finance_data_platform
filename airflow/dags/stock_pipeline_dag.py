@@ -4,10 +4,12 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
+from src.extract.fred_ingest import SERIES
 
 logger = logging.getLogger(__name__)
 
 symbols = ["NVDA","AAPL","MSFT","GOOGL","AMZN"]
+series_ids = SERIES
 
 # extraction method
 def extract_task(**context):
@@ -99,6 +101,32 @@ def edgar_task(**context):
         cursor.close()
         conn.close()
 
+# FRED ETL pipeline
+def fred_task(**context):
+    from src.db_connect import db_connect
+    from src.extract.fred_ingest import fetch_fred_series
+    from src.transform.transform_fred import transform_fred_series
+    from src.load.fred_loader import load_macros
+
+    # declare the connection instance, and its cursor to make it able to interact with SQL database
+    conn = db_connect()
+    cursor = conn.cursor()
+
+    try:
+        for series_id in series_ids:
+            filepath = fetch_fred_series(series_id)
+            df = transform_fred_series(filepath, series_id)
+            if not df.empty:
+                load_macros(cursor, df)
+        conn.commit()    
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()
+        
+
 def notify_on_failure(context):
     """Called when any task fails. Wire to Slack or email in production."""
     from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
@@ -184,7 +212,13 @@ with DAG(
     edgar_etl = PythonOperator(
         task_id = "edgar_etl",
         python_callable = edgar_task,
-        sla = timedelta(hours=1)
+        sla = timedelta(hours=2)
+    )
+
+    fred_etl = PythonOperator(
+        task_id = "fred_etl",
+        python_callable = fred_task,
+        sla = timedelta(hours=2)
     )
 
     dbt_run = BashOperator(
@@ -201,4 +235,4 @@ with DAG(
 
     # define task dependencies
     extract >> transform >> load
-    [load, edgar_etl] >> dbt_run >> dbt_test
+    [load, edgar_etl, fred_etl] >> dbt_run >> dbt_test
