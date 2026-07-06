@@ -68,3 +68,13 @@ sources:
             description: "Financial metric units"
           - name: filed_date
             description: "Date that the report was filed into SEC database (YYYY-MM-DD)"
+
+      - name: macros
+        description: "Macroeconomic data"
+        columns:
+          - name: series_id
+            description: "FRED series identifier, basically the macroeconomic metrics"
+          - name: date
+            description: "Date or period which series_id represents"
+          - name: value
+            description: "The actual value of that macroeconomic metric"
