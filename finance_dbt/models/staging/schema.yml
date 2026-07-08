@@ -81,3 +81,23 @@ models:
         description: "Timestamp when this record was staged"
         tests:
           - not_null
+
+  - name: stg_macro_indicators
+    description: "Thin staging view over mecroeconomic indicator. Adds loaded at timestamp"
+    columns:
+      - name: series_id
+        description: "Macroeconomic indicator series ID"
+        tests:
+          - not_null
+      - name: date
+        description: "Date for the period of series_id"
+        tests:
+          - not_null
+      - name: value
+        description: "The value of that macro indicators"
+        tests:
+          - not_null
+      - name: loaded_at
+        description: "Timestamp when this record was staged"
+        tests:
+          - not_null
