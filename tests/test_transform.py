@@ -5,6 +5,7 @@ import json
 import tempfile
 import os
 from transform.transform_stock import transform_stock_prices, transform_company_metadata
+from transform.transform_fred import transform_fred_series
 
 
 # we focused on testing on transformation phase. So, each class represents testing process on transformation method.
@@ -277,5 +278,79 @@ class TestTransformStockPricesEdgeCases:
             assert df.loc[df["date"].dt.month == 4, "quarter"].iloc[0] == 2
             assert df.loc[df["date"].dt.month == 7, "quarter"].iloc[0] == 3
             assert df.loc[df["date"].dt.month == 10, "quarter"].iloc[0] == 4
+        finally:
+            os.unlink(temp_filepath)
+
+class TestTransformFredSeries:
+
+    @pytest.fixture
+    def sample_api_response(self):
+        """
+        Create a mock API response JSON to interact with subsequent tests.
+        This simulates the structure of the AlphaVantage daily time series response.
+        """
+        return {
+            "observations": [
+                {"date": "2026-01-01", "value": "5.33"},
+                {"date": "2026-02-01", "value": "."}
+            ]
+        }
+    
+    def test_transform_returns_dataframe(self, sample_api_response):
+        """
+        Ensure that transformed data ia a pandas DataFrame
+        """
+        # create a temporary JSON file with sample_api_response() method
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(sample_api_response, f)
+            temp_filepath = f.name
+
+        # try calling the transform_fred_series (fred data transformation method) to ensure that we've got the output as designed (pandas DataFrame)
+        try:
+            df = transform_fred_series(temp_filepath, "FEDFUNDS")
+            assert isinstance(df, pd.DataFrame)
+        finally:
+            os.unlink(temp_filepath)
+            
+    def test_transform_has_required_columns(self, sample_api_response):
+        """
+        Ensure that transformed data has all column as required
+        """
+        # create a temporary dummy JSON file with sample_api_response() method
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(sample_api_response, f)
+            temp_filepath = f.name
+
+        # try calling the transform_fred_series (fred data transformation method) to ensure that the transformed data have all required columns
+        try:
+            df = transform_fred_series(temp_filepath, "FEDFUNDS")
+            required_cols = ["series_id", "date", "value"]
+            assert all(col in df.columns for col in required_cols)
+        finally:
+            os.unlink(temp_filepath)
+
+    def test_transform_series_id_parameter(self, sample_api_response):
+        # create a temporary dummy JSON data with sample_api_response() method
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump(sample_api_response, f)
+            temp_filepath = f.name
+
+        # try calling the defined transform_fred_series() method, then assure that all values inside particular columns are the specified values
+        try:
+            df = transform_fred_series(temp_filepath, "FEDFUNDS")
+            assert (df["series_id"] == "FEDFUNDS").all()
+        finally:
+            os.unlink(temp_filepath)
+
+    def  test_dot_values_are_skipped(self, sample_api_response):
+        # create a temporary dummy JSON data with sample_api_response() method
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(sample_api_response, f)
+            temp_filepath = f.name
+
+        try:
+            df = transform_fred_series(temp_filepath, "FEDFUNDS")
+            assert len(df) == 1
+            assert df["value"].iloc[0] == 5.33
         finally:
             os.unlink(temp_filepath)

@@ -4,6 +4,7 @@ from datetime import date
 
 from load.fact_loader import load_stock_prices, get_max_loaded_date
 from load.dimension_loader import load_dim_dates, load_dim_metadata
+from load.fred_loader import load_macros
 
 # define the helper functions for further testing as show below
 def _dim_date_row(date_str):
@@ -34,6 +35,13 @@ def _price_row(symbol, date_str, opening=148.0, closing=150.0):
         "quarter": ((dt.month - 1) // 3) + 1,
         "day_of_week": dt.dayofweek,
         "week_of_year": int(dt.isocalendar().week)
+    }
+
+def _macro_row(series_id, date_str, value=5.33):
+    return {
+        "series_id": series_id,
+        "date": pd.Timestamp(date_str),
+        "value": value
     }
 
 # create the class of testing methods
@@ -71,7 +79,7 @@ class TestLoadDimDates:
 
     def test_inserts_multiple_distinct_dates(self, db_cursor):
         """
-        Given put multiple distince dates, those 2 different dates should be loaded into the database
+        Given put multiple distinct dates, those 2 different dates should be loaded into the database
         """
         df = pd.DataFrame([_dim_date_row("2026-03-09"), _dim_date_row("2026-03-08")])
         load_dim_dates(db_cursor, df)
@@ -161,3 +169,35 @@ class TestLoadStockPrices:
         load_stock_prices(db_cursor, df)
         result = get_max_loaded_date(db_cursor, "AAPL")
         assert result == date(2026, 3, 9)
+
+@pytest.mark.integration
+class TestLoadMacros:
+    def test_inserts_rows(self, db_cursor):
+        """
+        Given the fred table is empty,
+        when we load a new information to the db, then it shouldbe inserted into the table in just one row
+        """
+        df = pd.DataFrame([_macro_row("FEDFUNDS", "2026-03-09")])
+        load_macros(db_cursor, df)
+        db_cursor.execute("SELECT COUNT(*) FROM macros;")
+        assert db_cursor.fetchone()[0] == 1
+
+    def test_idempotent_on_conflict(self, db_cursor):
+        """
+        When the identical rows is loaded into the database, our test ensures that the one would be rejected.
+        """
+        df = pd.DataFrame([_macro_row("FEDFUNDS", "2026-03-09")])
+        load_macros(db_cursor, df)
+        load_macros(db_cursor, df)
+        db_cursor.execute("SELECT COUNT(*) FROM macros;")
+        assert db_cursor.fetchone()[0] == 1
+
+    def test_inserts_multiple_rows(self, db_cursor):
+        """
+        Given the unidentical entries, both 2 data would be loaded into the database.
+        """
+
+        df = pd.DataFrame([_macro_row("FEDFUNDS", "2026-03-09"), _macro_row("FEDFUNDS", "2026-03-08")])
+        load_macros(db_cursor, df)
+        db_cursor.execute("SELECT COUNT (*) FROM macros;")
+        assert db_cursor.fetchone()[0] == 2
