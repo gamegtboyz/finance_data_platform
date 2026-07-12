@@ -1,6 +1,7 @@
 import pytest
 import pandas as pd
 from datetime import date
+from decimal import Decimal
 
 from load.fact_loader import load_stock_prices, get_max_loaded_date
 from load.dimension_loader import load_dim_dates, load_dim_metadata
@@ -104,7 +105,7 @@ class TestLoadDimMetadata:
         """
         load_dim_metadata(db_cursor, metadata)
         db_cursor.execute("SELECT * FROM dim_metadata")
-        assert db_cursor.fetchone() == ("AAPL", "Apple Inc.", "TECHNOLOGY")
+        assert db_cursor.fetchone() == ["AAPL", "Apple Inc.", "TECHNOLOGY"]
 
     def test_idempotent_on_conflict(self, db_cursor, metadata):
         """
@@ -158,7 +159,7 @@ class TestLoadStockPrices:
         self._seed(db_cursor, dates=("2026-03-09",))
         load_stock_prices(db_cursor, pd.DataFrame([_price_row("AAPL", "2026-03-09", opening=148.0, closing=150.0)]))
         db_cursor.execute("SELECT open_price, high, low, close_price, volume FROM stock_prices WHERE symbol = 'AAPL';")
-        assert db_cursor.fetchone() == (148.0, 151.0, 147.0, 150.0, 25000000)
+        assert db_cursor.fetchone() == (Decimal("148.0"), Decimal("151.0"), Decimal("147.0"), Decimal("150.0"), 25000000)
 
     def test_get_max_loaded_date(self, db_cursor):
         """

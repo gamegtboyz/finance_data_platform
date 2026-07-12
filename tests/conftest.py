@@ -70,6 +70,29 @@ def db_cursor():
         """
     )
 
+    # create temp macros staging table (used by Redshift COPY path)
+    cursor.execute(
+        """
+        CREATE TEMP TABLE staging_macros (
+            series_id   TEXT,
+            date        DATE,
+            value       FLOAT8
+        );
+        """
+    )
+
+    # create temp macros fact table
+    cursor.execute(
+        """
+        CREATE TEMP TABLE macros (
+            series_id   TEXT,
+            date        DATE,
+            value       FLOAT8,
+            PRIMARY KEY (series_id, date)
+        );
+        """
+    )
+
     yield cursor    # yield the cursor to the test function. This was used to separate the setup and teardown logic, which is a best practice for test fixtures.
     conn.rollback() # rollback any changes to ensure test isolation
     cursor.close()
