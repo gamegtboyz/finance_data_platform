@@ -28,3 +28,6 @@ sqlfluff
 
 # sec edgar api
 sec-edgar-api
+
+# vader sentiment analysis
+nltk
