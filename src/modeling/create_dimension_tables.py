@@ -77,9 +77,30 @@ def create_macros():
             date        DATE            NOT NULL,
             value       NUMERIC(12, 6)  NOT NULL,
             PRIMARY KEY (series_id, date)
-            );
+        );
         """
     )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def create_news_sentiment():
+    conn = db_connect()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS news_sentiment (
+            symbol          VARCHAR(10)     NOT NULL,
+            date            DATE            NOT NULL,
+            headline        TEXT            NOT NULL,
+            sentiment_score NUMERIC(5,4)    NOT NULL,
+            source          TEXT,           
+            url             TEXT            NOT NULL,
+            PRIMARY KEY (symbol, url)
+        );
+        """
+    )   # the 'source' field is the nullable, the 'TEXT' means that this field could accept the unlimited size of text, not like VARCHAR
 
     conn.commit()
     cursor.close()
@@ -91,3 +112,4 @@ if __name__ == "__main__":
     create_dim_metadata()
     create_fundamentals()
     create_macros()
+    create_news_sentiment()
