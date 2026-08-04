@@ -78,3 +78,19 @@ sources:
             description: "Date or period which series_id represents"
           - name: value
             description: "The actual value of that macroeconomic metric"
+
+      - name: news_sentiment
+        description: "News sentiment for the particular stocks"
+        columns:
+          - name: symbol
+            description: "Ticker symbol"
+          - name: date
+            description: "Date that the news posted"
+          - name: headline
+            description: "The short description of the news"
+          - name: sentiment_score
+            description: "Calculated sentiment score of the news"
+          - name: source
+            description: "Resource of the news"
+          - name: url
+            description: "URL link to the news"
