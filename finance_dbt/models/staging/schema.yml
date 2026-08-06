@@ -101,3 +101,35 @@ models:
         description: "Timestamp when this record was staged"
         tests:
           - not_null
+
+  - name: stg_news_sentiment
+    columns:
+      - name: symbol
+        description: "Ticker symbol"
+        tests:
+          - not_null
+      - name: date
+        description: "Date that the news posted"
+        tests:
+          - not_null
+      - name: headline
+        description: "The short description of the news"
+        tests:
+          - not_null
+      - name: sentiment_score
+        description: "Calculated sentiment score of the news"
+        tests:
+          - not_null
+      - name: source
+        description: "Resource of the news"
+        tests:
+          - not_null
+      - name: url
+        description: "URL link to the news"
+        tests:
+          - not_null
+          - unique
+      - name: loaded_at
+        description: "Timestamp when this record was staged"
+        tests:
+          - not_null
