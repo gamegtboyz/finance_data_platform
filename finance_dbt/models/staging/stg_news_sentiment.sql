@@ -6,6 +6,6 @@ SELECT
     headline,
     sentiment_score,
     source,
-    url
+    url,
     GETDATE() as loaded_at
 FROM {{ source('raw', 'news_sentiment')}}

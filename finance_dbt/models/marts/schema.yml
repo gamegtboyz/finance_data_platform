@@ -131,3 +131,32 @@ models:
         description: "Difference between 10Y and 2Y government bond yield"
       - name: unemployment_rate
         description: "Unemployment rate"
+
+  - name: mart_sentiment_vs_returns
+    description: >
+      Comparison between news sentiment score and returns
+    columns:
+      - name: symbol
+        description: "Ticker symbol"
+        tests:
+          - not_null
+      - name: date
+        description: "Date the news posted"
+        tests:
+          - not_null
+      - name: avg_sentiment_score
+        description: "Average sentiment score given the symbol and date"
+        tests:
+          - not_null
+      - name: headline_count
+        description: "The number of headline to that symbol of that date"
+        tests:
+          - not_null
+      - name: sector
+        description: "The sector of that symbol"
+      - name: daily_return
+        description: "The return of those symbol in daily basis"
+      - name: close_price
+        description: "Close price of the symbol of that day"
+      - name: next_day_return
+        description: "Next day return of those stocks given the sentiment scores of the current date"

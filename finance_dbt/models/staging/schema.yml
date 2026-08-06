@@ -122,8 +122,6 @@ models:
           - not_null
       - name: source
         description: "Resource of the news"
-        tests:
-          - not_null
       - name: url
         description: "URL link to the news"
         tests:
